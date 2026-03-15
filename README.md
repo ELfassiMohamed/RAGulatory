@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# vinterview_front
 
-## Getting Started
+## English Documentation
 
-First, run the development server:
+### Project Description
+This is the frontend of https://github.com/ELfassiMohamed/V-Interview-Backend.git. V-Interview is a modern web application designed for video interview management and interview simulation, providing a streamlined interface for conducting and preparing for professional interviews.
 
+### Technology Stack
+- Framework: Next.js 15.2.4 (App Router)
+- Library: React 19
+- Styling: Tailwind CSS 4
+- Language: TypeScript
+
+### Getting Started
+
+#### Installation
+To install the dependencies, run:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### Development Server
+To start the development server, run:
+```bash
+npm run dev
+```
+The application will be available at http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+#### Building for Production
+To create a production build, run:
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Documentation Française
 
-To learn more about Next.js, take a look at the following resources:
+### Description du Projet
+Ceci est le frontend de https://github.com/ELfassiMohamed/V-Interview-Backend.git. V-Interview est une application web moderne conçue pour la gestion et la simulation d'entretiens vidéo, offrant une interface optimisée pour mener et se préparer aux entretiens professionnels.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Pile Technique
+- Framework : Next.js 15.2.4 (App Router)
+- Bibliothèque : React 19
+- Style : Tailwind CSS 4
+- Langage : TypeScript
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Démarrage
 
-## Deploy on Vercel
+#### Installation
+Pour installer les dépendances, exécutez :
+```bash
+npm install
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+#### Serveur de Développement
+Pour lancer le serveur de développement, exécutez :
+```bash
+npm run dev
+```
+L'application sera accessible sur http://localhost:3000.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+#### Construction pour la Production
+Pour créer une version de production, exécutez :
+```bash
+npm run build
+```
