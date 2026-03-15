@@ -1,6 +1,8 @@
-# vinterview_front
+# V-Interview Frontend
 
-## English Documentation
+[English](#english) | [Français](#français)
+
+## English
 
 ### Project Description
 This is the frontend of https://github.com/ELfassiMohamed/V-Interview-Backend.git. V-Interview is a modern web application designed for video interview management and interview simulation, providing a streamlined interface for conducting and preparing for professional interviews.
@@ -34,7 +36,7 @@ npm run build
 
 ---
 
-## Documentation Française
+## Français
 
 ### Description du Projet
 Ceci est le frontend de https://github.com/ELfassiMohamed/V-Interview-Backend.git. V-Interview est une application web moderne conçue pour la gestion et la simulation d'entretiens vidéo, offrant une interface optimisée pour mener et se préparer aux entretiens professionnels.
