@@ -1,69 +1,27 @@
-# V-Interview Frontend
+# RAGulatory
 
 [English](#english) | [Français](#français)
 
 ## English
 
 ### Project Description
-This is the frontend of https://github.com/ELfassiMohamed/V-Interview-Backend.git. V-Interview is a modern web application designed for video interview management and interview simulation, providing a streamlined interface for conducting and preparing for professional interviews.
+RAGulatory is an AI-powered application leveraging Retrieval-Augmented Generation (RAG) to analyze complex regulatory documents. It acts as an intelligent chatbot, allowing users to ask questions about regulations and receive accurate, context-aware answers based on the provided documents.
 
-### Technology Stack
-- Framework: Next.js 15.2.4 (App Router)
-- Library: React 19
-- Styling: Tailwind CSS 4
-- Language: TypeScript
+### Key Features
+- **Regulatory Analysis:** Ingests and processes regulatory texts and compliance documents.
+- **Intelligent Chatbot:** Conversational interface for querying specific regulations or compliance requirements.
+- **Retrieval-Augmented Generation (RAG):** Ensures that the chatbot's answers are grounded in the actual regulatory source material, reducing AI hallucinations and improving accuracy.
 
-### Getting Started
-
-#### Installation
-To install the dependencies, run:
-```bash
-npm install
-```
-
-#### Development Server
-To start the development server, run:
-```bash
-npm run dev
-```
-The application will be available at http://localhost:3000.
-
-#### Building for Production
-To create a production build, run:
-```bash
-npm run build
-```
 
 ---
 
 ## Français
 
 ### Description du Projet
-Ceci est le frontend de https://github.com/ELfassiMohamed/V-Interview-Backend.git. V-Interview est une application web moderne conçue pour la gestion et la simulation d'entretiens vidéo, offrant une interface optimisée pour mener et se préparer aux entretiens professionnels.
+RAGulatory est une application propulsée par l'IA qui utilise la Génération Augmentée par la Recherche (RAG - Retrieval-Augmented Generation) pour analyser des documents réglementaires complexes. Elle agit comme un chatbot intelligent, permettant aux utilisateurs de poser des questions sur les réglementations et d'obtenir des réponses précises et contextualisées basées sur les documents fournis.
 
-### Pile Technique
-- Framework : Next.js 15.2.4 (App Router)
-- Bibliothèque : React 19
-- Style : Tailwind CSS 4
-- Langage : TypeScript
+### Fonctionnalités Principales
+- **Analyse Réglementaire :** Ingestion et traitement de textes réglementaires et de documents de conformité.
+- **Chatbot Intelligent :** Interface conversationnelle pour interroger des réglementations spécifiques ou des exigences de conformité.
+- **RAG :** Garantit que les réponses du chatbot sont fondées sur les sources réglementaires réelles, réduisant les hallucinations de l'IA et améliorant la précision.
 
-### Démarrage
-
-#### Installation
-Pour installer les dépendances, exécutez :
-```bash
-npm install
-```
-
-#### Serveur de Développement
-Pour lancer le serveur de développement, exécutez :
-```bash
-npm run dev
-```
-L'application sera accessible sur http://localhost:3000.
-
-#### Construction pour la Production
-Pour créer une version de production, exécutez :
-```bash
-npm run build
-```
