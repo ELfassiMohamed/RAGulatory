@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Assistant</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="app">
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="sidebar">
+        <div class="workspace-switcher">
+            <button class="ws-btn ws-active" id="btnCreateur" onclick="setMode('createur')">Cr&eacute;ateur</button>
+            <button class="ws-btn" id="btnAcheteur" onclick="setMode('acheteur')">Acheteur</button>
+        </div>
+
+        <div class="sidebar-header">
+            <span class="sidebar-logo">
+                <span class="sidebar-logo-mark">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                </span>
+                SaaS Assistant
+            </span>
+            <button class="btn-new" id="btnNewConv">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Nouvelle
+            </button>
+        </div>
+
+        <div class="search-wrap">
+            <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Rechercher..." autocomplete="off">
+        </div>
+
+        <div class="conv-list" id="convList"></div>
+
+        <div class="sidebar-agents">
+            <div class="section-label" id="agentsLabel">AGENTS CR&Eacute;ATEUR</div>
+            <div id="agentList"></div>
+        </div>
+    </aside>
+
+    <!-- ===================== CHAT PRINCIPAL ===================== -->
+    <main class="chat-main">
+
+        <!-- En-tête agent actif -->
+        <div class="agent-header-bar" id="agentHeaderBar" style="display:none;">
+            <div class="agent-avatar-disp" id="agentAvatar"></div>
+            <div class="agent-header-info">
+                <div class="agent-name-disp" id="agentNameDisp">Agent</div>
+                <div class="agent-mission-disp" id="agentMissionDisp">Mission</div>
+            </div>
+            <button class="btn-back-chat" onclick="closeAgent()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+                </svg>
+                Chat libre
+            </button>
+        </div>
+
+        <!-- En-tête normal -->
+        <div class="chat-header" id="chatHeader">
+            <span class="chat-title" id="chatTitle">Nouvelle conversation</span>
+
+            <!-- Boutons mode Cr&eacute;ateur -->
+            <div style="display:flex;gap:8px;align-items:center;" id="headerBtnsCreateur">
+                <button class="btn-predict-hdr" onclick="openPredictPanel()" title="Pr&eacute;dictions IA">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                    </svg>
+                    Pr&eacute;dictions IA
+                </button>
+                <button class="btn-audit-hdr" onclick="document.getElementById('auditModal').style.display='flex'" title="Mode Audit">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    Audit
+                </button>
+                <button class="btn-mrr" onclick="document.getElementById('mrrModal').style.display='flex'" title="Simulateur MRR/ARR">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23"/>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    MRR
+                </button>
+                <button class="btn-radar" onclick="document.getElementById('radarModal').style.display='flex'" title="Radar de positionnement">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    Radar
+                </button>
+                <button class="btn-export" id="btnExport" title="Exporter le diagnostic">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Exporter
+                </button>
+                <button class="btn-clear" id="btnClear" title="Vider la conversation" style="display:none;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14H6L5 6"/>
+                        <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+                    </svg>
+                    Vider
+                </button>
+            </div>
+
+            <!-- Boutons mode Acheteur -->
+            <div style="display:none;gap:8px;align-items:center;" id="headerBtnsAcheteur">
+                <button class="btn-roi-header" onclick="openRoiPanel()" title="Calculateur ROI/TCO">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                    ROI / TCO
+                </button>
+                <button class="btn-audit-hdr" onclick="document.getElementById('auditModal').style.display='flex'" title="Mode Audit">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    Audit SaaS
+                </button>
+                <button class="btn-arch" onclick="document.getElementById('archModal').style.display='flex'" title="Architecture IA">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                    </svg>
+                    Architecture IA
+                </button>
+                <button class="btn-clear" id="btnClearAcheteur" title="Vider la conversation" style="display:none;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14H6L5 6"/>
+                        <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+                    </svg>
+                    Vider
+                </button>
+            </div>
+        </div>
+
+        <!-- Zone messages -->
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome" id="welcomeMsg">
+                <div class="welcome-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <h2>Bienvenue &mdash; Assistant SaaS</h2>
+                <p>Posez une question sur le march&eacute; SaaS, la facturation ou l&rsquo;analyse de donn&eacute;es.</p>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator" style="display:none;">
+            <div class="typing-bubble"><span></span><span></span><span></span></div>
+        </div>
+
+        <div class="chat-input-wrap">
+            <div class="chat-input-box">
+                <textarea id="msgInput" placeholder="Envoyez un message&hellip; (Entr&eacute;e pour envoyer, Shift+Entr&eacute;e pour une nouvelle ligne)" rows="1" autocomplete="off"></textarea>
+                <button id="sendBtn">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===================== PANNEAU DROIT ===================== -->
+    <aside class="panel-right" id="panelRight" style="display:none;">
+        <div class="panel-header">
+            <span id="panelTitle">R&eacute;sultats</span>
+            <button class="panel-close" onclick="closePanel()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="panel-content" id="panelContent"></div>
+    </aside>
+</div>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Renommer -->
+<div class="modal-overlay" id="renameModal" style="display:none;">
+    <div class="modal">
+        <h3>Renommer la conversation</h3>
+        <input type="text" id="renameInput" placeholder="Nouveau titre..." maxlength="60">
+        <div class="modal-actions">
+            <button class="btn-cancel" id="renameCancelBtn">Annuler</button>
+            <button class="btn-confirm" id="renameConfirmBtn">Renommer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Export Pitch Deck -->
+<div class="modal-overlay" id="exportModal" style="display:none;">
+    <div class="modal" style="width:500px;max-width:95vw;">
+        <h3>Exporter le diagnostic Pitch Deck</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;">
+            <div>
+                <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Zone cible</label>
+                <input type="text" id="expZone" placeholder="ex: France, Maroc..." style="width:100%;padding:8px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;">
+            </div>
+            <div>
+                <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Segment cible</label>
+                <input type="text" id="expCible" placeholder="ex: PME, TPE, Startup..." style="width:100%;padding:8px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;">
+            </div>
+            <div>
+                <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Prix envisag&eacute; (EUR/mois)</label>
+                <input type="number" id="expPrix" placeholder="ex: 29" style="width:100%;padding:8px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;justify-content:flex-end;">
+                <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer;">
+                    <input type="checkbox" id="expFreemium"> Freemium pr&eacute;vu
+                </label>
+                <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer;">
+                    <input type="checkbox" id="expUsage"> Tarification &agrave; l&apos;usage
+                </label>
+            </div>
+        </div>
+        <div id="exportResult" style="display:none;margin-top:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;max-height:320px;overflow-y:auto;font-size:12px;font-family:monospace;white-space:pre-wrap;"></div>
+        <div class="modal-actions" style="margin-top:12px;">
+            <button class="btn-cancel" id="exportCancelBtn">Annuler</button>
+            <button class="btn-confirm" id="exportGenerateBtn">G&eacute;n&eacute;rer</button>
+            <button class="btn-confirm" id="exportDownloadBtn" style="display:none;background:#059669;">T&eacute;l&eacute;charger</button>
+        </div>
+    </div>
+</div>
+
+<!-- MRR Simulator -->
+<div class="modal-overlay" id="mrrModal" style="display:none;">
+    <div class="modal" style="width:420px;">
+        <h3>Simulateur MRR / ARR</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;">
+            <div>
+                <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Prix mensuel (EUR)</label>
+                <input type="number" id="mrrPrix" value="15" min="1" style="width:100%;padding:8px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;">
+            </div>
+            <div>
+                <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Nombre de clients</label>
+                <input type="number" id="mrrClients" value="100" min="1" style="width:100%;padding:8px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;">
+            </div>
+            <div>
+                <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Churn mensuel (%)</label>
+                <input type="number" id="mrrChurn" value="5" min="0" max="100" step="0.5" style="width:100%;padding:8px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;">
+            </div>
+            <div>
+                <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">CAC (EUR)</label>
+                <input type="number" id="mrrCac" value="150" min="1" style="width:100%;padding:8px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;">
+            </div>
+        </div>
+        <div id="mrrResult" style="margin-top:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;display:none;"></div>
+        <div class="modal-actions" style="margin-top:12px;">
+            <button class="btn-cancel" onclick="document.getElementById('mrrModal').style.display='none'">Fermer</button>
+            <button class="btn-confirm" onclick="calcMRR()">Calculer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Radar -->
+<div class="modal-overlay" id="radarModal" style="display:none;">
+    <div class="modal" style="width:480px;">
+        <h3>Radar de Positionnement</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;font-size:12px;">
+            <div>
+                <label style="color:#6b7280;display:block;margin-bottom:3px;">Prix envisag&eacute; (EUR)</label>
+                <input type="number" id="radPrix" placeholder="ex: 29" style="width:100%;padding:6px 8px;border:1.5px solid #d1d5db;border-radius:6px;outline:none;font-size:13px;">
+            </div>
+            <div>
+                <label style="color:#6b7280;display:block;margin-bottom:3px;">Zone cible</label>
+                <input type="text" id="radZone" placeholder="France, Maroc..." style="width:100%;padding:6px 8px;border:1.5px solid #d1d5db;border-radius:6px;outline:none;font-size:13px;">
+            </div>
+            <div>
+                <label style="color:#6b7280;display:block;margin-bottom:3px;">Segment</label>
+                <input type="text" id="radCible" placeholder="PME, TPE..." style="width:100%;padding:6px 8px;border:1.5px solid #d1d5db;border-radius:6px;outline:none;font-size:13px;">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;justify-content:flex-end;">
+                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" id="radApi"> API</label>
+                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" id="radMobile"> Mobile</label>
+                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" id="radUsage"> Usage-based</label>
+            </div>
+        </div>
+        <canvas id="radarChart" width="400" height="300"></canvas>
+        <div class="modal-actions" style="margin-top:12px;">
+            <button class="btn-cancel" onclick="document.getElementById('radarModal').style.display='none'">Fermer</button>
+            <button class="btn-confirm" onclick="drawRadar()">G&eacute;n&eacute;rer le radar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Architecture IA -->
+<div class="modal-overlay" id="archModal" style="display:none;">
+    <div class="modal arch-modal">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h3>Architecture IA &mdash; Pipeline Neuro-Symbolique</h3>
+            <button class="btn-cancel" style="padding:6px 14px;" onclick="document.getElementById('archModal').style.display='none'">&times;</button>
+        </div>
+        <div class="arch-pipeline">
+            <div class="arch-layer arch-layer-1">
+                <div class="arch-layer-icon">NLU</div>
+                <div class="arch-layer-body">
+                    <div class="arch-layer-title">Couche 1 &mdash; NLU / NER</div>
+                    <div class="arch-layer-sub">Transformers (Groq LLM)</div>
+                    <div class="arch-layer-desc">Texte libre &rarr; Entit&eacute;s structur&eacute;es &mdash; Secteur, Budget, Zone, Utilisateurs</div>
+                </div>
+                <div class="arch-badge arch-badge-blue">Extraction</div>
+            </div>
+            <div class="arch-arrow">&darr;</div>
+
+            <div class="arch-layer arch-layer-2">
+                <div class="arch-layer-icon">RAG</div>
+                <div class="arch-layer-body">
+                    <div class="arch-layer-title">Couche 2 &mdash; RAG + Analyse S&eacute;mantique</div>
+                    <div class="arch-layer-sub">TF-IDF + Embeddings denses</div>
+                    <div class="arch-layer-desc">Documents juridiques (CNDP, RGPD, SLA) index&eacute;s &rarr; retrieval + g&eacute;n&eacute;ration sourc&eacute;e</div>
+                </div>
+                <div class="arch-badge arch-badge-purple">Retrieval</div>
+            </div>
+            <div class="arch-arrow">&darr;</div>
+
+            <div class="arch-layer arch-layer-3">
+                <div class="arch-layer-icon">NCF</div>
+                <div class="arch-layer-body">
+                    <div class="arch-layer-title">Couche 3 &mdash; Recommender System</div>
+                    <div class="arch-layer-sub">Two-Tower Neural Network (NCF)</div>
+                    <div class="arch-layer-desc">Score matching = &sigma;(v<sub>Entreprise</sub> &middot; v<sub>SaaS</sub>) &mdash; Filtrage de masse avant MCDM</div>
+                </div>
+                <div class="arch-badge arch-badge-green">Matching</div>
+            </div>
+            <div class="arch-arrow">&darr;</div>
+
+            <div class="arch-layer arch-layer-4">
+                <div class="arch-layer-icon">MCDM</div>
+                <div class="arch-layer-body">
+                    <div class="arch-layer-title">Couche 4 &mdash; MCDM (Couche Symbolique)</div>
+                    <div class="arch-layer-sub">WSM + TOPSIS (NumPy natif)</div>
+                    <div class="arch-layer-desc">A<sub>i</sub> = &Sigma; w<sub>j</sub> &middot; r<sub>ij</sub> &nbsp;|&nbsp; C<sub>i</sub> = S<sub>i</sub><sup>&minus;</sup> / (S<sub>i</sub><sup>+</sup> + S<sub>i</sub><sup>&minus;</sup>) &mdash; D&eacute;cision XAI</div>
+                </div>
+                <div class="arch-badge arch-badge-orange">D&eacute;cision</div>
+            </div>
+            <div class="arch-arrow">&darr;</div>
+
+            <div class="arch-layer arch-layer-5">
+                <div class="arch-layer-icon">UI</div>
+                <div class="arch-layer-body">
+                    <div class="arch-layer-title">Couche 5 &mdash; Interface Dynamique</div>
+                    <div class="arch-layer-sub">Flask + Chart.js + Panneau asym&eacute;trique</div>
+                    <div class="arch-layer-desc">Chat guid&eacute; &harr; Widgets graphiques &mdash; ROI &middot; Conformit&eacute; &middot; Radar &middot; Plan</div>
+                </div>
+                <div class="arch-badge arch-badge-gray">Affichage</div>
+            </div>
+        </div>
+        <p style="font-size:11px;color:#9ca3af;text-align:center;margin-top:16px;">
+            Architecture neuro-symbolique hybride &mdash; XAI garanti par la couche MCDM
+        </p>
+    </div>
+</div>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script>
+/* ============================================================
+   Etat global
+   ============================================================ */
+var currentConvId  = null;
+var renamingConvId = null;
+var currentMode    = 'createur';
+var activeAgent    = null;
+var _exportRapport = '';
+var ALL_AGENTS     = { createur: [], acheteur: [] };
+
+/* SVG constants for action buttons */
+var SVG_COPY = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+var SVG_CHECK= '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+var SVG_UP   = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>';
+var SVG_DOWN = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>';
+
+/* ============================================================
+   Markdown renderer
+   ============================================================ */
+function renderMarkdown(text) {
+    var lines = text.split('\n');
+    var html = '', inList = false, inTable = false, tableRows = [];
+
+    function flushTable() {
+        if (!tableRows.length) return;
+        var th = tableRows[0].split('|').filter(function(c){ return c.trim(); })
+            .map(function(c){ return '<th>' + inlineMarkdown(c.trim()) + '</th>'; }).join('');
+        var trs = tableRows.slice(2).map(function(row){
+            return '<tr>' + row.split('|').filter(function(c){ return c.trim(); })
+                .map(function(c){ return '<td>' + inlineMarkdown(c.trim()) + '</td>'; }).join('') + '</tr>';
+        }).join('');
+        html += '<div class="table-wrap"><table><thead><tr>' + th + '</tr></thead><tbody>' + trs + '</tbody></table></div>';
+        tableRows = []; inTable = false;
+    }
+
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (line.trim().startsWith('|')) {
+            if (inList) { html += '</ul>'; inList = false; }
+            inTable = true; tableRows.push(line); continue;
+        } else if (inTable) { flushTable(); }
+        if (/^### (.+)/.test(line)) { if (inList) { html += '</ul>'; inList = false; } html += '<h4>' + inlineMarkdown(line.replace(/^### /, '')) + '</h4>'; continue; }
+        if (/^## (.+)/.test(line))  { if (inList) { html += '</ul>'; inList = false; } html += '<h3>' + inlineMarkdown(line.replace(/^## /, '')) + '</h3>'; continue; }
+        if (/^# (.+)/.test(line))   { if (inList) { html += '</ul>'; inList = false; } html += '<h2>' + inlineMarkdown(line.replace(/^# /, '')) + '</h2>'; continue; }
+        if (/^[\*\-•] (.+)/.test(line)) {
+            if (!inList) { html += '<ul>'; inList = true; }
+            html += '<li>' + inlineMarkdown(line.replace(/^[\*\-•] /, '')) + '</li>'; continue;
+        }
+        if (inList) { html += '</ul>'; inList = false; }
+        if (line.trim() === '') { html += '<br>'; continue; }
+        html += '<p>' + inlineMarkdown(line) + '</p>';
+    }
+    if (inTable) flushTable();
+    if (inList) html += '</ul>';
+    return html;
+}
+
+function inlineMarkdown(text) {
+    text = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    text = text.replace(/`(.+?)`/g, '<code>$1</code>');
+    return text;
+}
+
+/* ============================================================
+   Utilitaires
+   ============================================================ */
+function formatTime(dateStr) {
+    var d = dateStr ? new Date(dateStr) : new Date();
+    return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+function escapeHtml(t) {
+    return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function scrollToBottom() { var c = document.getElementById('chatMessages'); c.scrollTop = c.scrollHeight; }
+function autoResize() {
+    var ta = document.getElementById('msgInput');
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
+}
+function agentInitials(name) {
+    var p = String(name).trim().split(/\s+/);
+    return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : String(name).substring(0,2).toUpperCase();
+}
+
+/* ============================================================
+   Mode Workspace
+   ============================================================ */
+function setMode(mode) {
+    currentMode = mode;
+    var isAcheteur = mode === 'acheteur';
+    document.getElementById('btnCreateur').classList.toggle('ws-active', !isAcheteur);
+    document.getElementById('btnAcheteur').classList.toggle('ws-active', isAcheteur);
+    document.getElementById('headerBtnsCreateur').style.display = isAcheteur ? 'none' : 'flex';
+    document.getElementById('headerBtnsAcheteur').style.display = isAcheteur ? 'flex' : 'none';
+    document.getElementById('agentsLabel').textContent = isAcheteur ? 'AGENTS ACHETEUR' : 'AGENTS CRÉATEUR';
+    closeAgent(false);
+    renderAgents();
+    if (isAcheteur) { showWelcomeAcheteur(); } else { showWelcome(); }
+}
+
+/* ============================================================
+   Agents
+   ============================================================ */
+function loadAgents() {
+    fetch('/api/agents').then(function(r){ return r.json(); }).then(function(data) {
+        ALL_AGENTS = data; renderAgents();
+    });
+}
+
+function renderAgents() {
+    var agents = ALL_AGENTS[currentMode] || [];
+    var list = document.getElementById('agentList');
+    list.innerHTML = '';
+    agents.forEach(function(agent) {
+        var initials = agentInitials(agent.name);
+        var isActive = activeAgent && activeAgent.id === agent.id;
+        var item = document.createElement('div');
+        item.className = 'agent-item' + (isActive ? ' agent-active' : '');
+        item.dataset.id = agent.id;
+        item.innerHTML =
+            '<span class="agent-icon-disp" style="background:' + (isActive ? (agent.color || '#1d4ed8') : '#374151') + ';">' + initials + '</span>' +
+            '<div class="agent-item-info">' +
+            '<span class="agent-item-name">' + escapeHtml(agent.name) + '</span>' +
+            '<span class="agent-item-desc">' + escapeHtml(agent.description) + '</span>' +
+            '</div>';
+        item.addEventListener('click', function(){ selectAgent(agent); });
+        list.appendChild(item);
+    });
+}
+
+function selectAgent(agent) {
+    activeAgent = agent;
+    renderAgents();
+    var color    = agent.color || '#1d4ed8';
+    var initials = agentInitials(agent.name);
+    var bar = document.getElementById('agentHeaderBar');
+    bar.style.display = 'flex';
+    bar.style.borderLeftColor = color;
+    var av = document.getElementById('agentAvatar');
+    av.textContent = initials;
+    av.style.background = color;
+    document.getElementById('agentNameDisp').textContent    = agent.name;
+    document.getElementById('agentMissionDisp').textContent = agent.mission;
+    document.getElementById('chatHeader').style.display = 'none';
+    if (currentMode === 'acheteur') { openPanelForAgent(agent); }
+    newConversation(true);
+    showAgentWelcome(agent);
+}
+
+function closeAgent(doResetConv) {
+    if (doResetConv === undefined) doResetConv = true;
+    activeAgent = null;
+    document.getElementById('agentHeaderBar').style.display = 'none';
+    document.getElementById('chatHeader').style.display = 'flex';
+    closePanel();
+    renderAgents();
+    if (doResetConv) showWelcome();
+}
+
+function showAgentWelcome(agent) {
+    var c        = document.getElementById('chatMessages');
+    var color    = agent.color || '#1d4ed8';
+    var initials = agentInitials(agent.name);
+
+    var stepsHtml = '';
+    if (agent.steps && agent.steps.length) {
+        stepsHtml = '<div class="agent-steps"><div class="agent-steps-title">Comment &ccedil;a marche&nbsp;:</div>' +
+            agent.steps.map(function(s, i) {
+                return '<div class="agent-step"><span class="step-num" style="background:' + color + ';">' + (i+1) + '</span><span>' + escapeHtml(s) + '</span></div>';
+            }).join('') + '</div>';
+    }
+    var suggestHtml = '';
+    if (agent.suggestions && agent.suggestions.length) {
+        suggestHtml = '<div class="agent-suggestions-title">Questions sugg&eacute;r&eacute;es&nbsp;:</div><div class="agent-suggestions">' +
+            agent.suggestions.map(function(s) {
+                return '<button class="agent-suggest-btn" onclick="useSuggestion(' + JSON.stringify(s) + ')" style="border-color:' + color + ';color:' + color + ';">' + escapeHtml(s) + '</button>';
+            }).join('') + '</div>';
+    }
+    var livrableHtml = agent.livrable
+        ? '<div class="agent-livrable"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>' + escapeHtml(agent.livrable) + '</span></div>'
+        : '';
+
+    c.innerHTML =
+        '<div class="welcome agent-welcome" style="border-top:4px solid ' + color + ';max-width:560px;margin:20px auto;">' +
+        '<div class="agent-welcome-header">' +
+        '<div class="agent-welcome-badge" style="background:' + color + ';">' + initials + '</div>' +
+        '<div><h2 style="font-size:20px;color:#111827;margin:0;">' + escapeHtml(agent.name) + '</h2>' +
+        '<p style="color:' + color + ';font-weight:600;font-size:13px;margin:2px 0 0;">' + escapeHtml(agent.mission) + '</p></div>' +
+        '</div>' +
+        (agent.longDescription ? '<p class="agent-long-desc">' + escapeHtml(agent.longDescription) + '</p>' : '') +
+        stepsHtml + livrableHtml + suggestHtml + '</div>';
+
+    document.getElementById('btnClear').style.display = 'none';
+    document.getElementById('btnClearAcheteur').style.display = 'none';
+}
+
+function useSuggestion(text) {
+    var input = document.getElementById('msgInput');
+    input.value = text; input.focus(); autoResize();
+}
+
+/* ============================================================
+   Panneau droit
+   ============================================================ */
+function openPanelForAgent(agent) {
+    var titles = { cadrage:'Cahier des charges', comparateur:'Comparateur', roi:'Calculateur ROI/TCO', conformite:'Checklist Conformité', deploiement:'Plan de déploiement' };
+    var builders = { cadrage:buildCadragePanel, comparateur:buildComparateurPanel, roi:buildRoiPanel, conformite:buildConformitePanel, deploiement:buildDeploiementPanel };
+    if (!builders[agent.id]) return;
+    document.getElementById('panelTitle').textContent = titles[agent.id];
+    document.getElementById('panelContent').innerHTML = builders[agent.id]();
+    document.getElementById('panelRight').style.display = 'flex';
+    if (agent.id === 'roi') { document.getElementById('btnCalcROI').addEventListener('click', calcROI); }
+}
+
+function openRoiPanel() {
+    document.getElementById('panelTitle').textContent = 'Calculateur ROI/TCO';
+    document.getElementById('panelContent').innerHTML = buildRoiPanel();
+    document.getElementById('panelRight').style.display = 'flex';
+    document.getElementById('btnCalcROI').addEventListener('click', calcROI);
+}
+
+function closePanel() { document.getElementById('panelRight').style.display = 'none'; }
+
+/* ============================================================
+   Panneaux — contenu
+   ============================================================ */
+function buildCadragePanel() {
+    return '<div class="panel-section">' +
+        '<p class="panel-hint">Décrivez votre besoin en texte libre — le moteur NLU extrait automatiquement les critères.</p>' +
+        '<div class="nlu-input-wrap"><textarea id="nluText" class="nlu-textarea" rows="3" placeholder="Ex : Je cherche un SaaS de comptabilité pour 15 employés au Maroc, budget max 3000 DH/mois…"></textarea>' +
+        '<button class="btn-nlu" id="btnNLU" onclick="runNLU()">Extraire les critères</button></div>' +
+        '<div id="nluResult" style="display:none;">' +
+        '<div class="nlu-badge-row" id="nluBadges"></div>' +
+        '<div class="nlu-conf-row"><span class="nlu-conf-label">Confiance NLU :</span>' +
+        '<div class="nlu-conf-bar"><div id="nluConfFill" class="nlu-conf-fill"></div></div>' +
+        '<span id="nluConfPct">0%</span></div></div>' +
+        '<hr style="margin:14px 0;border:none;border-top:1px solid #e5e7eb;">' +
+        '<div class="cdc-section"><h4>Secteur / Besoin</h4><p class="cdc-placeholder" id="cdcSecteurVal">Non défini</p></div>' +
+        '<div class="cdc-section"><h4>Budget &amp; Utilisateurs</h4><p class="cdc-placeholder" id="cdcBudgetVal">Non défini</p></div>' +
+        '<div class="cdc-section"><h4>Zone géographique</h4><p class="cdc-placeholder" id="cdcZoneVal">Non défini</p></div>' +
+        '<div class="cdc-section"><h4>Fonctionnalités demandées</h4><p class="cdc-placeholder" id="cdcFonctVal">Non défini</p></div>' +
+        '<div class="cdc-section"><h4>Contraintes de sécurité</h4><p class="cdc-placeholder" id="cdcSecuVal">Non défini</p></div>' +
+        '</div>';
+}
+
+function buildComparateurPanel() {
+    return '<div class="panel-section">' +
+        '<p class="panel-hint">Ajustez les poids selon vos priorités (total = 100 %), puis lancez l\'analyse.</p>' +
+        '<div class="weight-group">' +
+        '<div class="weight-row"><label>Fonctionnalités <span class="weight-val" id="wFonctLabel">30%</span></label><input type="range" class="weight-slider" id="wFonct" min="0" max="100" value="30" oninput="syncWeights()"></div>' +
+        '<div class="weight-row"><label>Coût / TCO <span class="weight-val" id="wCoutLabel">40%</span></label><input type="range" class="weight-slider" id="wCout" min="0" max="100" value="40" oninput="syncWeights()"></div>' +
+        '<div class="weight-row"><label>Sécurité &amp; SLA <span class="weight-val" id="wSecuLabel">30%</span></label><input type="range" class="weight-slider" id="wSecu" min="0" max="100" value="30" oninput="syncWeights()"></div>' +
+        '<div class="weight-total" id="weightTotal">Total : <strong>100%</strong></div></div>' +
+        '<div style="display:flex;gap:6px;margin:10px 0;">' +
+        '<button class="btn-method active-method" id="btnWSM" onclick="setMCDMMethod(\'wsm\')">WSM</button>' +
+        '<button class="btn-method" id="btnTOPSIS" onclick="setMCDMMethod(\'topsis\')">TOPSIS</button></div>' +
+        '<button class="btn-calc-roi" id="btnCompare" onclick="runCompare()">Comparer les solutions</button>' +
+        '<div id="compareResult" style="display:none;"></div></div>';
+}
+
+function buildRoiPanel() {
+    return '<div class="panel-section roi-form">' +
+        '<h4 style="margin-bottom:12px;">Paramètres du projet</h4>' +
+        '<div class="form-row"><label>Prix mensuel/utilisateur (EUR)</label><input type="number" id="roiPrix" value="29" min="1"></div>' +
+        '<div class="form-row"><label>Nombre d\'utilisateurs</label><input type="number" id="roiUsers" value="20" min="1"></div>' +
+        '<div class="form-row"><label>Durée d\'engagement (mois)</label><input type="number" id="roiDuree" value="12" min="1"></div>' +
+        '<hr style="margin:12px 0;border:none;border-top:1px solid #e5e7eb;">' +
+        '<h4 style="margin-bottom:12px;">Coûts cachés</h4>' +
+        '<div class="form-row"><label>Migration des données (EUR)</label><input type="number" id="roiMigration" value="0" min="0"></div>' +
+        '<div class="form-row"><label>Formation des équipes (EUR)</label><input type="number" id="roiFormation" value="0" min="0"></div>' +
+        '<div class="form-row"><label>Support premium/an (EUR)</label><input type="number" id="roiSupport" value="0" min="0"></div>' +
+        '<hr style="margin:12px 0;border:none;border-top:1px solid #e5e7eb;">' +
+        '<h4 style="margin-bottom:12px;">Gains estimés</h4>' +
+        '<div class="form-row"><label>Temps économ. (h/mois/user)</label><input type="number" id="roiTemps" value="5" min="0" step="0.5"></div>' +
+        '<div class="form-row"><label>Coût horaire employé (EUR)</label><input type="number" id="roiCoutH" value="30" min="1"></div>' +
+        '<button class="btn-calc-roi" id="btnCalcROI">Calculer ROI / TCO</button>' +
+        '<div id="roiResult" style="display:none;"></div></div>';
+}
+
+function buildConformitePanel() {
+    var items = [
+        { label:'Localisation des données (EU/Maroc)', risk:'orange', note:'Demander la localisation physique des serveurs' },
+        { label:'Conformité RGPD / CNDP',             risk:'orange', note:'Vérifier la politique de confidentialité' },
+        { label:'Certification ISO 27001 ou SOC 2',   risk:'orange', note:'Demander les certificats à l\'éditeur' },
+        { label:'SLA disponibilité ≥ 99,9 %', risk:'green', note:'99,9 % = max 8h30 de downtime/an' },
+        { label:'Clause de réversibilité des données', risk:'red', note:'Critique : vérifier avant signature' },
+        { label:'Authentification MFA / SSO',              risk:'green', note:'Réduire le risque d’accès non autorisé' }
+    ];
+    var cmap = { green:'#22c55e', orange:'#f59e0b', red:'#ef4444' };
+    var rlabel = { green:'Faible', orange:'Moyen', red:'Élevé' };
+    var rows = items.map(function(it){
+        var col = cmap[it.risk];
+        return '<div class="conform-item"><span class="conform-dot" style="background:' + col + ';"></span>' +
+               '<div><span class="conform-name">' + it.label + '</span>' +
+               '<span class="conform-risk" style="color:' + col + ';">Risque ' + rlabel[it.risk] + '</span>' +
+               '<span class="conform-status">' + it.note + '</span></div></div>';
+    }).join('');
+    return '<div class="panel-section">' +
+        '<p class="panel-hint">Discutez avec l’agent pour évaluer chaque point.</p>' +
+        '<div class="risk-legend">' +
+        '<span class="risk-badge" style="background:#dcfce7;color:#166534;">● Faible</span>' +
+        '<span class="risk-badge" style="background:#fef9c3;color:#92400e;">● Moyen</span>' +
+        '<span class="risk-badge" style="background:#fee2e2;color:#991b1b;">● Élevé</span></div>' +
+        '<div class="conform-list">' + rows + '</div></div>';
+}
+
+function buildDeploiementPanel() {
+    var phases = [
+        { n:'1', name:'Pilote',       dur:'Sem. 1–4',  desc:'5–10 utilisateurs clés, test des fonctions critiques', color:'#7c3aed' },
+        { n:'2', name:'Formation',    dur:'Sem. 5–8',  desc:'Sessions par département, guides internes',                  color:'#0891b2' },
+        { n:'3', name:'Déploiement', dur:'Sem. 9–12', desc:'Ouverture progressive, support renforcé',               color:'#059669' },
+        { n:'4', name:'Adoption',     dur:'Mois 4–6', desc:'Suivi KPIs, feedback, optimisation',                              color:'#d97706' }
+    ];
+    var rows = phases.map(function(p){
+        return '<div class="phase-item"><div class="phase-num" style="background:' + p.color + ';">' + p.n + '</div>' +
+               '<div class="phase-info"><div class="phase-name">' + p.name + ' <span class="phase-dur">' + p.dur + '</span></div>' +
+               '<div class="phase-desc">' + p.desc + '</div></div></div>';
+    }).join('');
+    return '<div class="panel-section"><p class="panel-hint">Plan standard — l’agent l’adapte à votre contexte.</p>' +
+           '<div class="phase-list">' + rows + '</div></div>';
+}
+
+/* ============================================================
+   Calcul ROI
+   ============================================================ */
+var _amortChart = null;
+function calcROI() {
+    var btn = document.getElementById('btnCalcROI');
+    btn.textContent = 'Calcul…'; btn.disabled = true;
+    var params = {
+        prix_mensuel:           parseFloat(document.getElementById('roiPrix').value)      || 0,
+        n_utilisateurs:         parseInt(document.getElementById('roiUsers').value)        || 1,
+        duree_mois:             parseInt(document.getElementById('roiDuree').value)        || 12,
+        temps_economise_h_mois: parseFloat(document.getElementById('roiTemps').value)     || 0,
+        cout_heure_employe:     parseFloat(document.getElementById('roiCoutH').value)     || 30,
+        migration_cost:         parseFloat(document.getElementById('roiMigration').value) || 0,
+        formation_cost:         parseFloat(document.getElementById('roiFormation').value) || 0,
+        support_premium:        parseFloat(document.getElementById('roiSupport').value)   || 0
+    };
+    fetch('/api/procurement/roi', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(params) })
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+        btn.textContent = 'Calculer ROI / TCO'; btn.disabled = false;
+        var ok = d.rentable;
+        var el = document.getElementById('roiResult');
+        el.style.display = 'block';
+        el.innerHTML =
+            '<div class="roi-grid">' +
+            '<div class="roi-card roi-tco"><div class="roi-label">TCO Total</div><div class="roi-val">' + formatEur(d.tco) + '</div></div>' +
+            '<div class="roi-card roi-gain"><div class="roi-label">Gain Total</div><div class="roi-val">' + formatEur(d.gain_total) + '</div></div>' +
+            '<div class="roi-card ' + (ok?'roi-pos':'roi-neg') + '"><div class="roi-label">ROI</div><div class="roi-val">' + d.roi_pct + '%</div></div>' +
+            '<div class="roi-card roi-payback"><div class="roi-label">Payback</div><div class="roi-val">' + (d.payback_mois ? d.payback_mois + ' mois' : '∞') + '</div></div></div>' +
+            '<div class="roi-verdict ' + (ok?'verdict-ok':'verdict-ko') + '">' + (ok ? 'Investissement rentable' : 'Investissement non rentable sur la période') + '</div>' +
+            '<div class="roi-detail">' +
+            '<div>Abonnement : ' + formatEur(d.abonnement_total) + '</div>' +
+            (d.migration_cost ? '<div>Migration : ' + formatEur(d.migration_cost) + '</div>' : '') +
+            (d.formation_cost ? '<div>Formation : ' + formatEur(d.formation_cost) + '</div>' : '') +
+            (d.support_premium ? '<div>Support : ' + formatEur(d.support_premium) + '</div>' : '') + '</div>' +
+            '<div class="amort-title">Courbe d\'amortissement</div><canvas id="amortChart" height="160"></canvas>';
+        var duree = params.duree_mois;
+        var fc = (params.migration_cost||0) + (params.formation_cost||0);
+        var mc = params.prix_mensuel * params.n_utilisateurs + (params.support_premium||0)/12;
+        var mg = d.gain_mensuel;
+        var lbl = [], cd = [], gd = [];
+        for (var m = 1; m <= duree; m++) { lbl.push('M'+m); cd.push(Math.round(fc+mc*m)); gd.push(Math.round(mg*m)); }
+        if (_amortChart) _amortChart.destroy();
+        _amortChart = new Chart(document.getElementById('amortChart').getContext('2d'), {
+            type:'line', data:{ labels:lbl, datasets:[
+                { label:'TCO cumulé',    data:cd, borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.08)',  borderWidth:2, pointRadius:0, tension:0.3, fill:true },
+                { label:'Gains cumulés', data:gd, borderColor:'#22c55e', backgroundColor:'rgba(34,197,94,0.08)', borderWidth:2, pointRadius:0, tension:0.3, fill:true }
+            ]},
+            options:{ responsive:true, plugins:{ legend:{position:'bottom',labels:{font:{size:10}}}, tooltip:{callbacks:{label:function(c){ return c.dataset.label+' : '+c.raw.toLocaleString('fr-FR')+' €'; }}} }, scales:{ x:{ticks:{font:{size:9},maxTicksLimit:6}}, y:{ticks:{font:{size:9},callback:function(v){ return (v/1000).toFixed(0)+'k€'; }}} } }
+        });
+    }).catch(function(){ btn.textContent='Calculer ROI / TCO'; btn.disabled=false; });
+}
+function formatEur(n) { return Number(n).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' €'; }
+
+/* ============================================================
+   Predictions IA
+   ============================================================ */
+var _tcoChart5=null, _shapChart=null;
+
+function openPredictPanel() {
+    document.getElementById('panelTitle').textContent = 'Prédictions IA';
+    document.getElementById('panelContent').innerHTML = buildPredictPanel();
+    document.getElementById('panelRight').style.display = 'flex';
+}
+
+function buildPredictPanel() {
+    return '<div class="panel-section pred-form">' +
+        '<p class="panel-hint">Cochez les fonctionnalités et renseignez le prix pour obtenir les 4 prédictions RF.</p>' +
+        '<div class="pred-section-title">Fonctionnalités</div>' +
+        '<div class="pred-checks">' +
+        '<label><input type="checkbox" id="pAPI"> API</label>' +
+        '<label><input type="checkbox" id="pMobile"> Mobile</label>' +
+        '<label><input type="checkbox" id="pCompta"> Comptabilité</label>' +
+        '<label><input type="checkbox" id="pCRM"> CRM</label>' +
+        '<label><input type="checkbox" id="pPDP"> PDP</label>' +
+        '<label><input type="checkbox" id="pFreemium"> Freemium</label>' +
+        '<label><input type="checkbox" id="pUsage"> Usage-based</label>' +
+        '<label><input type="checkbox" id="pEssai"> Essai gratuit</label></div>' +
+        '<div class="pred-section-title" style="margin-top:10px;">Données du SaaS</div>' +
+        '<div class="form-row"><label>Prix min (EUR/mois)</label><input type="number" id="pPrixMin" value="15" min="0"></div>' +
+        '<div class="form-row"><label>Prix max (EUR/mois)</label><input type="number" id="pPrixMax" value="99" min="0"></div>' +
+        '<div class="form-row"><label>Note G2 (1–5)</label><input type="number" id="pNote" value="4.0" min="1" max="5" step="0.1"></div>' +
+        '<div class="form-row"><label>Satisfaction (%)</label><input type="number" id="pSatisf" value="87" min="0" max="100"></div>' +
+        '<div class="form-row"><label>Zone</label><select id="pZone" style="width:100%;padding:6px 9px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;"><option>France</option><option>Maroc</option><option>Mondial</option></select></div>' +
+        '<div class="form-row"><label>Cible</label><select id="pCible" style="width:100%;padding:6px 9px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;"><option>PME</option><option>TPE</option><option>Grande entreprise</option><option>Startup</option></select></div>' +
+        '<button class="btn-calc-roi" id="btnPredict" onclick="runPredict()">Analyser avec l\'IA</button>' +
+        '<div id="predictResult" style="display:none;"></div></div>';
+}
+
+function runPredict() {
+    var btn = document.getElementById('btnPredict');
+    btn.textContent = 'Analyse en cours…'; btn.disabled = true;
+    var features = {
+        has_API:document.getElementById('pAPI').checked?1:0, has_mobile:document.getElementById('pMobile').checked?1:0,
+        has_compta:document.getElementById('pCompta').checked?1:0, has_CRM:document.getElementById('pCRM').checked?1:0,
+        has_PDP:document.getElementById('pPDP').checked?1:0, a_freemium:document.getElementById('pFreemium').checked?1:0,
+        a_usage_based:document.getElementById('pUsage').checked?1:0, a_essai_gratuit:document.getElementById('pEssai').checked?1:0,
+        prix_min_eur:parseFloat(document.getElementById('pPrixMin').value)||0, prix_max_eur:parseFloat(document.getElementById('pPrixMax').value)||0,
+        note_g2:parseFloat(document.getElementById('pNote').value)||4, satisfaction_pct:parseFloat(document.getElementById('pSatisf').value)||85,
+        zone:document.getElementById('pZone').value, cible:document.getElementById('pCible').value
+    };
+    fetch('/api/predict/all',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(features)})
+    .then(function(r){ return r.json().then(function(data){ return {ok:r.ok,status:r.status,data:data}; }); })
+    .then(function(res){
+        btn.textContent='Analyser avec l\'IA'; btn.disabled=false;
+        var data=res.data;
+        var el=document.getElementById('predictResult'); el.style.display='block';
+        if (!res.ok||data.error) { el.innerHTML='<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;color:#991b1b;font-size:13px;"><strong>Prédictions indisponibles</strong><br>'+escapeHtml(data.error||'Erreur serveur ('+res.status+')')+'</div>'; return; }
+        var preds=data.predictions||{};
+        if (Object.keys(preds).length>0 && Object.values(preds).every(function(r){return r&&r.error;})) {
+            el.innerHTML='<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;color:#991b1b;font-size:13px;"><strong>Modèles ML non chargés</strong><br>'+escapeHtml(Object.values(preds)[0].error||'')+'<br><small>Installez : <code>pip install scikit-learn imbalanced-learn openpyxl</code></small></div>'; return;
+        }
+        renderPredictResult(data, features);
+    }).catch(function(){
+        btn.textContent='Analyser avec l\'IA'; btn.disabled=false;
+        document.getElementById('predictResult').style.display='block';
+        document.getElementById('predictResult').innerHTML='<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;color:#991b1b;font-size:13px;"><strong>Connexion échouée</strong><br>Vérifiez que le serveur Flask est démarré.</div>';
+    });
+}
+
+function renderPredictResult(data, features) {
+    var preds=data.predictions||{}, expl=data.explanation||[], anomaly=data.anomaly||{};
+    var el=document.getElementById('predictResult'); el.style.display='block';
+    var labelMap={classe_prix:'Prix',efacture:'Fac.',satisfaction:'Sat.',segment_taille:'Seg.'};
+    var order=['classe_prix','efacture','satisfaction','segment_taille'];
+    var badgesHtml='<div class="pred-badges">';
+    order.forEach(function(task){
+        var r=preds[task]; if(!r||r.error) return;
+        var isAlert=(task==='efacture'&&r.label==='Non conforme')||(task==='satisfaction'&&r.label==='Moyenne');
+        var alertTag=isAlert?'<span style="font-size:10px;background:#fef2f2;color:#991b1b;border-radius:4px;padding:1px 5px;margin-left:4px;">Attention</span>':'';
+        badgesHtml+='<div class="pred-badge" style="border-left:4px solid '+r.color+';">' +
+            '<div class="pred-badge-icon" style="background:'+r.color+';">'+labelMap[task]+'</div>' +
+            '<div class="pred-badge-body"><div class="pred-badge-label">'+r.display+'</div>' +
+            '<div class="pred-badge-value" style="color:'+r.color+';">'+r.label+alertTag+'</div>' +
+            '<div class="pred-badge-conf">Confiance : '+r.confidence+'% <span class="pred-acc">· Modèle : '+r.accuracy+'</span></div>' +
+            '</div></div>';
+    });
+    badgesHtml+='</div>';
+    var anomalyHtml='';
+    if(anomaly.has_anomaly){
+        var isOver=anomaly.ecart_pct>0;
+        anomalyHtml='<div class="anomaly-alert '+(isOver?'anomaly-high':'anomaly-low')+'">' +
+            '<div class="anomaly-verdict">'+anomaly.verdict+'</div>' +
+            '<div class="anomaly-detail">Prix proposé : <strong>'+anomaly.prix_propose+' €</strong> ' +
+            '| Réf. marché : <strong>'+anomaly.prix_reference+' €</strong> ' +
+            '| Écart : <strong>'+(isOver?'+':'')+anomaly.ecart_pct+'%</strong></div></div>';
+    }
+    var shapHtml=expl.length?'<div class="shap-title">Pourquoi ce prix ? (SHAP)</div><canvas id="shapChart" height="130"></canvas>':'';
+    var tcoHtml='<div class="tco5-section"><div class="pred-section-title">TCO sur 5 ans</div>' +
+        '<div class="form-row"><label>Croissance annuelle (%)</label><input type="number" id="tco5Growth" value="15" min="0" max="100" step="5"></div>' +
+        '<button class="btn-tco5" onclick="runTCO5('+(features.prix_max_eur||0)+',20)">Projeter le TCO</button>' +
+        '<canvas id="tcoChart5" height="140" style="margin-top:10px;display:none;"></canvas></div>';
+    el.innerHTML=badgesHtml+anomalyHtml+shapHtml+tcoHtml;
+    if(expl.length){ setTimeout(function(){renderSHAPChart(expl);},50); }
+}
+
+function renderSHAPChart(expl){
+    var ctx=document.getElementById('shapChart'); if(!ctx) return;
+    if(_shapChart)_shapChart.destroy();
+    var labels=expl.map(function(c){return c.feature.replace(/_/g,' ');}),
+        values=expl.map(function(c){return c.display_pct;}),
+        colors=values.map(function(v){return v>=0?'rgba(34,197,94,0.7)':'rgba(239,68,68,0.7)';});
+    _shapChart=new Chart(ctx.getContext('2d'),{type:'bar',data:{labels:labels,datasets:[{data:values,backgroundColor:colors,borderRadius:3}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return(c.raw>0?'+':'')+c.raw.toFixed(1)+'% impact';}}}},scales:{x:{ticks:{font:{size:9},callback:function(v){return v+'%';}}},y:{ticks:{font:{size:10}}}}}});
+}
+
+function runTCO5(prixMensuel,nUsers){
+    var growth=(parseFloat(document.getElementById('tco5Growth').value)||15)/100;
+    fetch('/api/predict/tco5ans',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prix_mensuel:prixMensuel,n_utilisateurs:nUsers,taux_croissance_annuel:growth})})
+    .then(function(r){return r.json();}).then(function(d){
+        var canvas=document.getElementById('tcoChart5'); canvas.style.display='block';
+        if(_tcoChart5)_tcoChart5.destroy();
+        _tcoChart5=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels:d.annees,datasets:[{label:'Annuel',data:d.annual_costs,backgroundColor:'rgba(29,78,216,0.7)',borderRadius:4},{label:'Cumulé',data:d.cumulative,type:'line',borderColor:'#ef4444',borderWidth:2,pointRadius:3,tension:0.3,fill:false,yAxisID:'y2'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10}}},tooltip:{callbacks:{label:function(c){return c.dataset.label+' : '+Number(c.raw).toLocaleString('fr-FR')+' EUR';}}}},scales:{y:{ticks:{font:{size:9},callback:function(v){return(v/1000).toFixed(0)+'k';}}},y2:{position:'right',ticks:{font:{size:9},callback:function(v){return(v/1000).toFixed(0)+'k';}},grid:{drawOnChartArea:false}}}}});
+    }).catch(function(){});
+}
+
+/* NLU */
+function runNLU(){
+    var text=document.getElementById('nluText').value.trim(); if(!text) return;
+    var btn=document.getElementById('btnNLU'); btn.textContent='Analyse…'; btn.disabled=true;
+    fetch('/api/nlu/extract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text})})
+    .then(function(r){return r.json();}).then(function(data){
+        btn.textContent='Extraire les critères'; btn.disabled=false;
+        renderNLUResult(data);
+        var inp=document.getElementById('msgInput'); if(!inp.value.trim()) inp.value=text;
+    }).catch(function(){btn.textContent='Extraire les critères'; btn.disabled=false;});
+}
+
+function renderNLUResult(data){
+    var c=data.criteria||{}, weights=data.mcdm_weights_suggested||{}, conf=c._confidence||0;
+    var badges=[];
+    if(c.secteur) badges.push({label:c.secteur,color:'#dbeafe'});
+    if(c.utilisateurs) badges.push({label:c.utilisateurs+' users',color:'#dcfce7'});
+    if(c.zone) badges.push({label:c.zone,color:'#fef9c3'});
+    if(c.budget_max_eur) badges.push({label:c.budget_max_eur+' EUR/mois',color:'#fae8ff'});
+    if(c.budget_max_dh) badges.push({label:c.budget_max_dh+' DH/mois',color:'#fae8ff'});
+    if(c.contraintes_securite) badges.push({label:'Sécurité requise',color:'#fee2e2'});
+    document.getElementById('nluBadges').innerHTML=badges.map(function(b){return '<span class="nlu-badge" style="background:'+b.color+';">'+escapeHtml(b.label)+'</span>';}).join('')||'<span style="color:#9ca3af;font-size:12px;">Aucune entité détectée</span>';
+    document.getElementById('nluResult').style.display='block';
+    document.getElementById('nluConfFill').style.width=conf+'%';
+    document.getElementById('nluConfFill').style.background=conf>70?'#22c55e':conf>40?'#f59e0b':'#ef4444';
+    document.getElementById('nluConfPct').textContent=conf+'%';
+    if(c.secteur){document.getElementById('cdcSecteurVal').textContent=c.secteur; document.getElementById('cdcSecteurVal').classList.remove('cdc-placeholder');}
+    var bs=[]; if(c.budget_max_eur) bs.push(c.budget_max_eur+' EUR/mois'); if(c.utilisateurs) bs.push(c.utilisateurs+' utilisateurs');
+    if(bs.length){document.getElementById('cdcBudgetVal').textContent=bs.join(' - '); document.getElementById('cdcBudgetVal').classList.remove('cdc-placeholder');}
+    if(c.zone){document.getElementById('cdcZoneVal').textContent=c.zone; document.getElementById('cdcZoneVal').classList.remove('cdc-placeholder');}
+    var fs=(c.fonctionnalites||[]).concat(c.integrationsRequises||[]);
+    if(fs.length){document.getElementById('cdcFonctVal').textContent=fs.join(', '); document.getElementById('cdcFonctVal').classList.remove('cdc-placeholder');}
+    if(c.contraintes_securite!==undefined){document.getElementById('cdcSecuVal').textContent=c.contraintes_securite?'RGPD/CNDP obligatoire':'Pas de contrainte spécifique'; document.getElementById('cdcSecuVal').classList.remove('cdc-placeholder');}
+    if(weights.fonctionnalite!==undefined){
+        try{
+            var wF=Math.round(weights.fonctionnalite*100), wC=Math.round(weights.cout_tco*100), wS=Math.round(weights.securite_sla*100), el;
+            el=document.getElementById('wFonct'); if(el) el.value=wF;
+            el=document.getElementById('wCout');  if(el) el.value=wC;
+            el=document.getElementById('wSecu');  if(el) el.value=wS;
+            if(document.getElementById('wFonct')) syncWeights();
+        }catch(e){}
+    }
+}
+
+/* MCDM */
+var _mcdmMethod='wsm';
+function setMCDMMethod(m){ _mcdmMethod=m; document.getElementById('btnWSM').classList.toggle('active-method',m==='wsm'); document.getElementById('btnTOPSIS').classList.toggle('active-method',m==='topsis'); }
+function syncWeights(){
+    var wF=parseInt(document.getElementById('wFonct').value), wC=parseInt(document.getElementById('wCout').value), wS=parseInt(document.getElementById('wSecu').value), total=wF+wC+wS;
+    document.getElementById('wFonctLabel').textContent=wF+'%'; document.getElementById('wCoutLabel').textContent=wC+'%'; document.getElementById('wSecuLabel').textContent=wS+'%';
+    document.getElementById('weightTotal').innerHTML='Total : <strong style="color:'+(total===100?'#059669':'#ef4444')+';">'+total+'%</strong>';
+}
+function runCompare(){
+    var wF=parseInt(document.getElementById('wFonct').value)/100, wC=parseInt(document.getElementById('wCout').value)/100, wS=parseInt(document.getElementById('wSecu').value)/100;
+    var btn=document.getElementById('btnCompare'); btn.textContent='Analyse en cours…'; btn.disabled=true;
+    fetch('/api/procurement/compare',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:_mcdmMethod,weights:{fonctionnalite:wF,cout_tco:wC,securite_sla:wS}})})
+    .then(function(r){return r.json();}).then(function(data){ btn.textContent='Comparer les solutions'; btn.disabled=false; renderCompareResult(data); })
+    .catch(function(){ btn.textContent='Comparer les solutions'; btn.disabled=false; });
+}
+function renderCompareResult(data){
+    var results=data.results||[], method=(data.method||'wsm').toUpperCase();
+    var el=document.getElementById('compareResult'); el.style.display='block';
+    el.innerHTML='<div class="comp-method-tag">Méthode : '+method+'</div>' +
+        results.map(function(sol){
+            var isReco=sol.recommended, bar=Math.round(sol.score*100);
+            return '<div class="comp-result-item'+(isReco?' comp-reco':'')+'">' +
+                '<div class="comp-result-header"><span class="comp-sol-name">'+escapeHtml(sol.name)+(isReco?' <span class="comp-tag">Recommandé</span>':'')+' </span><span class="comp-score-num">'+sol.score.toFixed(3)+'</span></div>' +
+                '<div class="comp-bar-wrap"><div class="comp-bar" style="width:'+Math.min(bar*4,100)+'%;background:'+(isReco?'#1d4ed8':'#9ca3af')+';"></div></div>' +
+                '<div class="comp-sol-desc">'+escapeHtml(sol.description||'')+'</div></div>';
+        }).join('');
+}
+
+/* Conversations */
+function loadConversations(search){
+    var url='/api/conversations'; if(search) url+='?q='+encodeURIComponent(search);
+    fetch(url).then(function(r){return r.json();}).then(renderConvList);
+}
+function renderConvList(convs){
+    var list=document.getElementById('convList');
+    if(!convs.length){list.innerHTML='<p class="no-results">Aucune conversation.</p>';return;}
+    list.innerHTML='';
+    convs.forEach(function(conv){
+        var item=document.createElement('div');
+        item.className='conv-item'+(conv.id===currentConvId?' active':''); item.dataset.id=conv.id;
+        item.innerHTML='<span class="conv-title">'+escapeHtml(conv.title)+'</span>' +
+            '<div class="conv-actions">' +
+            '<button class="btn-icon btn-rename" title="Renommer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+            '<button class="btn-icon btn-delete" title="Supprimer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>' +
+            '</div>';
+        item.querySelector('.conv-title').addEventListener('click', function(){ openConversation(conv.id, conv.title); });
+        item.querySelector('.btn-rename').addEventListener('click', function(e){ e.stopPropagation(); openRenameModal(conv.id, conv.title); });
+        item.querySelector('.btn-delete').addEventListener('click', function(e){ e.stopPropagation(); deleteConversation(conv.id); });
+        list.appendChild(item);
+    });
+}
+function openConversation(id,title){
+    currentConvId=id; activeAgent=null;
+    document.getElementById('agentHeaderBar').style.display='none';
+    document.getElementById('chatHeader').style.display='flex';
+    document.getElementById('chatTitle').textContent=title;
+    var c=document.getElementById('chatMessages'); c.innerHTML='';
+    fetch('/api/conversations/'+id+'/messages').then(function(r){return r.json();}).then(function(msgs){
+        if(!msgs.length){showWelcome();return;}
+        msgs.forEach(function(m){appendMessage(m.role,m.content,m.created_at);});
+        scrollToBottom(); document.getElementById('btnClear').style.display='flex';
+    });
+    document.querySelectorAll('.conv-item').forEach(function(el){el.classList.toggle('active',parseInt(el.dataset.id)===id);});
+    renderAgents();
+}
+function newConversation(silent){
+    fetch('/api/conversations',{method:'POST'}).then(function(r){return r.json();}).then(function(conv){
+        currentConvId=conv.id;
+        if(!silent){document.getElementById('chatTitle').textContent='Nouvelle conversation'; if(currentMode==='acheteur') showWelcomeAcheteur(); else showWelcome();}
+        loadConversations();
+    });
+}
+
+var WELCOME_SVG = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>';
+
+function showWelcome(){
+    document.getElementById('chatMessages').innerHTML =
+        '<div class="welcome" id="welcomeMsg"><div class="welcome-icon">'+WELCOME_SVG+'</div>' +
+        '<h2>Bienvenue — Assistant SaaS</h2>' +
+        '<p>Posez une question sur le marché SaaS, la facturation ou l’analyse de données.</p></div>';
+    document.getElementById('btnClear').style.display='none';
+    document.getElementById('btnClearAcheteur').style.display='none';
+}
+function showWelcomeAcheteur(){
+    document.getElementById('chatMessages').innerHTML =
+        '<div class="welcome" id="welcomeMsg">' +
+        '<div class="welcome-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>' +
+        '<h2>Mode Acheteur</h2>' +
+        '<p>Sélectionnez un agent dans la barre latérale pour démarrer votre évaluation SaaS.</p></div>';
+    document.getElementById('btnClear').style.display='none';
+    document.getElementById('btnClearAcheteur').style.display='none';
+}
+
+/* Messages */
+function appendMessage(role,content,dateStr){
+    var welcome=document.getElementById('welcomeMsg'); if(welcome) welcome.style.display='none';
+    var btnClear=currentMode==='acheteur'?document.getElementById('btnClearAcheteur'):document.getElementById('btnClear');
+    if(btnClear) btnClear.style.display='flex';
+    var c=document.getElementById('chatMessages'), isUser=role==='user';
+    var div=document.createElement('div');
+    div.className='message '+(isUser?'msg-user':'msg-bot');
+    var contentHtml=isUser?escapeHtml(content).replace(/\n/g,'<br>'):renderMarkdown(content);
+    var actionsHtml=isUser
+        ?'<div class="msg-actions"><button class="action-btn" onclick="copyText(this)" title="Copier">'+SVG_COPY+'</button></div>'
+        :'<div class="msg-actions"><button class="action-btn" onclick="copyText(this)" title="Copier">'+SVG_COPY+'</button><button class="action-btn" onclick="thumbAction(this)" title="Utile">'+SVG_UP+'</button><button class="action-btn" onclick="thumbAction(this)" title="Pas utile">'+SVG_DOWN+'</button></div>';
+    var sender=isUser?'Vous':(activeAgent?activeAgent.name:'SaaS Assistant');
+    div.innerHTML='<div class="msg-bubble"><div class="msg-content">'+contentHtml+'</div><div class="msg-meta">'+sender+' · '+formatTime(dateStr)+'</div>'+actionsHtml+'</div>';
+    div.querySelector('.msg-content').dataset.raw=content;
+    c.appendChild(div); scrollToBottom();
+}
+function copyText(btn){
+    var raw=btn.closest('.msg-bubble').querySelector('.msg-content').dataset.raw||'';
+    navigator.clipboard.writeText(raw).then(function(){ btn.innerHTML=SVG_CHECK; setTimeout(function(){btn.innerHTML=SVG_COPY;},1500); });
+}
+function thumbAction(btn){ btn.classList.toggle('active-thumb'); }
+
+/* Send */
+function sendMessage(){
+    var input=document.getElementById('msgInput'), message=input.value.trim();
+    if(!message) return;
+    input.value=''; input.style.height='auto';
+    document.getElementById('sendBtn').disabled=true;
+    appendMessage('user',message);
+    document.getElementById('typingIndicator').style.display='flex';
+    scrollToBottom();
+    fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:message,conversation_id:currentConvId,agent_type:activeAgent?activeAgent.id:null})})
+    .then(function(r){return r.json();}).then(function(data){
+        document.getElementById('typingIndicator').style.display='none';
+        if(data.error){ appendMessage('assistant','Erreur : '+data.error); }
+        else{
+            if(!currentConvId) currentConvId=data.conversation_id;
+            if(data.title) document.getElementById('chatTitle').textContent=data.title;
+            appendMessage('assistant',data.response||'(réponse vide)');
+            loadConversations();
+        }
+    }).catch(function(){
+        document.getElementById('typingIndicator').style.display='none';
+        appendMessage('assistant','Connexion perdue. Vérifiez que le serveur est démarré et réessayez.');
+    }).finally(function(){ document.getElementById('sendBtn').disabled=false; });
+}
+
+/* Delete / Clear / Rename */
+function deleteConversation(id){
+    if(!confirm('Supprimer cette conversation ?')) return;
+    fetch('/api/conversations/'+id,{method:'DELETE'}).then(function(){
+        if(currentConvId===id){currentConvId=null; document.getElementById('chatTitle').textContent='Nouvelle conversation'; showWelcome();}
+        loadConversations();
+    });
+}
+function clearChat(){
+    if(!currentConvId) return;
+    if(!confirm('Vider tous les messages ?')) return;
+    fetch('/api/conversations/'+currentConvId+'/clear',{method:'DELETE'}).then(function(){
+        document.getElementById('chatTitle').textContent='Nouvelle conversation'; showWelcome(); loadConversations();
+    });
+}
+function openRenameModal(id,title){ renamingConvId=id; document.getElementById('renameInput').value=title; document.getElementById('renameModal').style.display='flex'; document.getElementById('renameInput').focus(); }
+function closeRenameModal(){ document.getElementById('renameModal').style.display='none'; renamingConvId=null; }
+function confirmRename(){
+    var t=document.getElementById('renameInput').value.trim();
+    if(!t||!renamingConvId){closeRenameModal();return;}
+    fetch('/api/conversations/'+renamingConvId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:t})})
+    .then(function(){ if(currentConvId===renamingConvId) document.getElementById('chatTitle').textContent=t; closeRenameModal(); loadConversations(); });
+}
+
+/* Events */
+document.getElementById('btnNewConv').addEventListener('click', function(){ newConversation(false); });
+document.getElementById('btnClear').addEventListener('click', clearChat);
+document.getElementById('btnClearAcheteur').addEventListener('click', clearChat);
+document.getElementById('sendBtn').addEventListener('click', sendMessage);
+document.getElementById('msgInput').addEventListener('keydown', function(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} });
+document.getElementById('msgInput').addEventListener('input', autoResize);
+document.getElementById('searchInput').addEventListener('input', function(){ loadConversations(this.value.trim()); });
+document.getElementById('renameCancelBtn').addEventListener('click', closeRenameModal);
+document.getElementById('renameConfirmBtn').addEventListener('click', confirmRename);
+document.getElementById('renameInput').addEventListener('keydown', function(e){ if(e.key==='Enter') confirmRename(); if(e.key==='Escape') closeRenameModal(); });
+document.getElementById('renameModal').addEventListener('click', function(e){ if(e.target===this) closeRenameModal(); });
+
+/* Export */
+document.getElementById('btnExport').addEventListener('click', function(){ document.getElementById('exportModal').style.display='flex'; document.getElementById('exportResult').style.display='none'; document.getElementById('exportDownloadBtn').style.display='none'; });
+document.getElementById('exportCancelBtn').addEventListener('click', function(){ document.getElementById('exportModal').style.display='none'; });
+document.getElementById('exportModal').addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
+document.getElementById('exportGenerateBtn').addEventListener('click', function(){
+    var zone=document.getElementById('expZone').value.trim()||null, cible=document.getElementById('expCible').value.trim()||null;
+    var px=document.getElementById('expPrix').value.trim(), prix=px?parseFloat(px):null;
+    var btn=document.getElementById('exportGenerateBtn'); btn.textContent='Génération…'; btn.disabled=true;
+    fetch('/api/export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({zone:zone,cible:cible,prix:prix,has_freemium:document.getElementById('expFreemium').checked,has_usage:document.getElementById('expUsage').checked})})
+    .then(function(r){return r.json();}).then(function(data){
+        _exportRapport=data.rapport||''; var el=document.getElementById('exportResult'); el.textContent=_exportRapport; el.style.display='block';
+        document.getElementById('exportDownloadBtn').style.display='inline-flex'; btn.textContent='Générer'; btn.disabled=false;
+    }).catch(function(){btn.textContent='Générer'; btn.disabled=false;});
+});
+document.getElementById('exportDownloadBtn').addEventListener('click', function(){
+    var blob=new Blob([_exportRapport],{type:'text/markdown'}), url=URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=url; a.download='pitch_deck_saas.md'; a.click(); URL.revokeObjectURL(url);
+});
+
+/* MRR */
+function calcMRR(){
+    var prix=parseFloat(document.getElementById('mrrPrix').value)||15, clients=parseInt(document.getElementById('mrrClients').value)||100;
+    var churn=parseFloat(document.getElementById('mrrChurn').value)||5, cac=parseFloat(document.getElementById('mrrCac').value)||150;
+    var mrr=prix*clients, arr=mrr*12, ltv=prix/(churn/100), ltvCac=ltv/cac, payback=cac/prix;
+    var el=document.getElementById('mrrResult'); el.style.display='block';
+    el.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
+        '<div style="background:#dbeafe;border-radius:6px;padding:10px;text-align:center;"><div style="font-size:11px;color:#1e40af;font-weight:600;">MRR</div><div style="font-size:18px;font-weight:700;color:#1d4ed8;">'+mrr.toLocaleString()+' EUR</div></div>' +
+        '<div style="background:#dcfce7;border-radius:6px;padding:10px;text-align:center;"><div style="font-size:11px;color:#166534;font-weight:600;">ARR</div><div style="font-size:18px;font-weight:700;color:#16a34a;">'+arr.toLocaleString()+' EUR</div></div>' +
+        '<div style="background:#fef9c3;border-radius:6px;padding:10px;text-align:center;"><div style="font-size:11px;color:#713f12;font-weight:600;">LTV</div><div style="font-size:16px;font-weight:700;color:#ca8a04;">'+Math.round(ltv).toLocaleString()+' EUR</div></div>' +
+        '<div style="background:'+(ltvCac>=3?'#dcfce7':'#fee2e2')+';border-radius:6px;padding:10px;text-align:center;"><div style="font-size:11px;font-weight:600;">LTV/CAC</div><div style="font-size:16px;font-weight:700;">'+ltvCac.toFixed(1)+'x</div></div></div>' +
+        '<div style="margin-top:8px;font-size:12px;color:#6b7280;">Payback : <strong>'+Math.round(payback)+' mois</strong></div>';
+}
+
+/* Radar */
+var _radarChartInstance=null;
+function drawRadar(){
+    var prix=parseFloat(document.getElementById('radPrix').value)||null, zone=document.getElementById('radZone').value.trim()||null, cible=document.getElementById('radCible').value.trim()||null;
+    var hasApi=document.getElementById('radApi').checked, hasMobile=document.getElementById('radMobile').checked, hasUsage=document.getElementById('radUsage').checked;
+    fetch('/api/export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({zone:zone,cible:cible,prix:prix,has_freemium:false,has_usage:hasUsage})})
+    .then(function(r){return r.json();}).then(function(data){
+        var rapport=data.rapport||'', ctx=document.getElementById('radarChart').getContext('2d');
+        if(_radarChartInstance)_radarChartInstance.destroy();
+        var mFit=rapport.includes('concurrent')?7:5, pricing=prix?(prix<30?8:prix<60?6:4):5;
+        var innov=(hasUsage?3:0)+(hasApi?2:0)+(hasMobile?2:0)+3;
+        var conform=(zone&&zone.toLowerCase().includes('france'))?9:7, scale=(hasApi?3:0)+(hasUsage?2:0)+5;
+        _radarChartInstance=new Chart(ctx,{type:'radar',data:{labels:['Market Fit','Pricing','Innovation','Conformité','Scalabilité'],datasets:[{label:'Votre projet',data:[mFit,pricing,Math.min(10,innov),conform,Math.min(10,scale)],backgroundColor:'rgba(29,78,216,0.15)',borderColor:'#1d4ed8',pointBackgroundColor:'#1d4ed8',borderWidth:2}]},options:{scales:{r:{min:0,max:10,ticks:{stepSize:2,font:{size:10}},pointLabels:{font:{size:12,weight:'600'}}}},plugins:{legend:{position:'bottom'}}}});
+    });
+}
+
+/* Init */
+loadAgents();
+loadConversations();
+</script>
+
+<!-- ==================== MODAL AUDIT ==================== -->
+<div class="modal-overlay" id="auditModal" style="display:none;">
+  <div class="modal" style="width:580px;max-width:96vw;max-height:88vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3>Mode Audit &mdash; Analyse en temps r&eacute;el</h3>
+      <button class="btn-cancel" style="padding:6px 14px;" onclick="document.getElementById('auditModal').style.display='none'">&times;</button>
+    </div>
+    <p style="font-size:12px;color:#6b7280;margin-bottom:14px;">
+      Entrez le nom ou l&rsquo;URL d&rsquo;un SaaS pour obtenir une analyse compl&egrave;te&nbsp;: caract&eacute;ristiques, pr&eacute;dictions IA, comparaison march&eacute;.
+    </p>
+    <div class="form-row">
+      <label>Nom ou URL du SaaS</label>
+      <input type="text" id="auditQuery" placeholder="ex: Salesforce, HubSpot, https://monday.com..."
+             style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;">
+    </div>
+    <button class="btn-confirm" id="btnAuditRun" onclick="runAudit()" style="width:100%;margin:10px 0;">
+      Lancer l&rsquo;Audit
+    </button>
+    <div id="auditLoader" style="display:none;text-align:center;padding:20px;color:#6b7280;font-size:13px;">
+      Analyse en cours&hellip; (10&ndash;20 secondes)
+    </div>
+    <div id="auditResult" style="display:none;"></div>
+    <div style="margin-top:14px;padding:10px;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0;font-size:11px;color:#166534;">
+      Ce syst&egrave;me fournit une <strong>estimation</strong> bas&eacute;e sur des donn&eacute;es historiques.
+      La d&eacute;cision finale reste de la responsabilit&eacute; de l&rsquo;utilisateur.
+      Vos donn&eacute;es sont anonymis&eacute;es avant traitement (conformit&eacute; RGPD &amp; CNDP).
+    </div>
+  </div>
+</div>
+
+<script>
+function runAudit(){
+  var query=document.getElementById('auditQuery').value.trim(); if(!query) return;
+  document.getElementById('auditLoader').style.display='block';
+  document.getElementById('auditResult').style.display='none';
+  document.getElementById('btnAuditRun').disabled=true;
+  fetch('/api/audit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:query,lang:'fr'})})
+  .then(function(r){return r.json();}).then(function(data){
+    document.getElementById('auditLoader').style.display='none';
+    document.getElementById('btnAuditRun').disabled=false;
+    renderAuditResult(data);
+  }).catch(function(){
+    document.getElementById('auditLoader').style.display='none';
+    document.getElementById('btnAuditRun').disabled=false;
+    document.getElementById('auditResult').style.display='block';
+    document.getElementById('auditResult').innerHTML='<p style="color:#ef4444;">Erreur lors de l\'audit. Vérifiez votre connexion.</p>';
+  });
+}
+
+function renderAuditResult(data){
+  var el=document.getElementById('auditResult'); el.style.display='block';
+  var preds=(data.predictions||{}).predictions||{}, comp=(data.comparison||{}).comparaison_marche||{}, feats=data.features||{};
+  var taskColors={classe_prix:'#7c3aed',efacture:'#059669',satisfaction:'#d97706',segment_taille:'#0891b2'};
+  var badgesHtml='';
+  Object.keys(preds).forEach(function(task){
+    var r=preds[task]; if(!r||r.error) return;
+    badgesHtml+='<span class="audit-badge" style="border-color:'+(taskColors[task]||'#6b7280')+';color:'+(taskColors[task]||'#6b7280')+';">'+r.label+' <small>('+r.confidence+'%)</small></span>';
+  });
+  var compHtml='';
+  if(comp.prix_median_eur){
+    var ecart=comp.ecart_pct, ecartColor=ecart>30?'#ef4444':ecart<-30?'#22c55e':'#f59e0b';
+    compHtml='<div class="audit-comp">' +
+      '<div class="audit-comp-row"><span>Prix médian marché</span><strong>'+comp.prix_median_eur+' EUR</strong></div>' +
+      '<div class="audit-comp-row"><span>Solutions similaires</span><strong>'+comp.n_similaires+'</strong></div>' +
+      '<div class="audit-comp-row"><span>Satisfaction moyenne marché</span><strong>'+comp.satisfaction_moy+'%</strong></div>' +
+      (ecart!==null?'<div class="audit-comp-row"><span>Écart de prix</span><strong style="color:'+ecartColor+';">'+(ecart>0?'+':'')+ecart+'%</strong></div>':'') +
+      '</div>';
+  }
+  var reportHtml=data.report?'<div class="audit-report">'+renderMarkdown(data.report)+'</div>':'';
+  el.innerHTML='<div style="margin-bottom:10px;"><strong style="font-size:13px;">'+escapeHtml(data.saas_name||'')+'</strong>' +
+    (feats.description?'<p style="font-size:12px;color:#6b7280;margin-top:2px;">'+escapeHtml(feats.description)+'</p>':'')+'</div>' +
+    '<div class="audit-badges">'+badgesHtml+'</div>' +
+    compHtml+reportHtml +
+    '<div style="font-size:10px;color:#9ca3af;margin-top:10px;">Durée d\'analyse : '+(data.duration_ms||0)+'ms</div>';
+}
+</script>
+
+</body>
+</html>
