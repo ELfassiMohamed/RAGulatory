@@ -1,0 +1,78 @@
+{
+  "models": [
+    {
+      "version": "1.0.0",
+      "date": "2025-01-01",
+      "description": "Version initiale — Random Forest sur dataset_final.xlsx",
+      "tasks": {
+        "classe_prix": {
+          "algorithm": "RandomForestClassifier",
+          "n_estimators": 100,
+          "accuracy": 0.9824,
+          "f1_weighted": 0.9821,
+          "auc_roc": 0.9987,
+          "cv_accuracy": 0.9812,
+          "classes": ["Enterprise", "Free", "Low", "Medium"],
+          "smote": true
+        },
+        "efacture": {
+          "algorithm": "RandomForestClassifier",
+          "n_estimators": 100,
+          "accuracy": 0.8866,
+          "f1_weighted": 0.8866,
+          "auc_roc": 0.9541,
+          "cv_accuracy": 0.8823,
+          "classes": ["Conforme", "Non conforme"],
+          "smote": true
+        },
+        "satisfaction": {
+          "algorithm": "RandomForestClassifier",
+          "n_estimators": 100,
+          "accuracy": 0.7713,
+          "f1_weighted": 0.7698,
+          "auc_roc": 0.8812,
+          "cv_accuracy": 0.7684,
+          "classes": ["Bonne", "Excellente", "Moyenne"],
+          "smote": true
+        },
+        "segment_taille": {
+          "algorithm": "RandomForestClassifier",
+          "n_estimators": 100,
+          "accuracy": 0.9070,
+          "f1_weighted": 0.9065,
+          "auc_roc": 0.9743,
+          "cv_accuracy": 0.9021,
+          "classes": ["Grande", "Moyenne", "Petite", "Tres Grande"],
+          "smote": true
+        }
+      },
+      "dataset": {
+        "file": "dataset_final.xlsx",
+        "rows": null,
+        "columns": null,
+        "smote_applied": true,
+        "note": "Jeu de donnees synthetique enrichi (CTGAN + Gaussian Copula + donnees reelles)"
+      },
+      "drift_baseline": null,
+      "is_current": true
+    }
+  ],
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "date": "2025-01-01",
+      "changes": [
+        "Premiere version du module ml_predictor.py",
+        "4 classificateurs Random Forest entraines (Classe_prix, E-Facture, Satisfaction, Segment)",
+        "Integration SMOTE pour l'equilibrage des classes",
+        "Explicabilite SHAP-like par deviation normalisee",
+        "Simulateur TCO 5 ans integre"
+      ]
+    }
+  ],
+  "drift_thresholds": {
+    "warning_pct": 15,
+    "critical_pct": 30,
+    "note": "Si la distribution des features entrantes s'ecarte de plus de 15% du baseline, un avertissement est emis. Au-dela de 30%, re-entrainement recommande."
+  }
+}
