@@ -7,7 +7,8 @@ PROCUREMENT_AGENTS = [
     {"id":"comparateur","name":"Agent Comparateur","icon":"\U0001f50d","mission":"Je compare les solutions SaaS selon vos criteres","description":"Matching score et tableau comparatif MCDM","color":"#0891b2","longDescription":"Cet agent utilise deux methodes d'aide a la decision multicritere (MCDM) : WSM pour un classement rapide, et TOPSIS pour les arbitrages complexes. Vous ajustez les poids de chaque critere et l'agent calcule le score de matching pour chaque solution.","steps":["Decrivez les solutions SaaS que vous souhaitez comparer","Ajustez les curseurs de priorite : Fonctionnalites / Cout / Securite (100% au total)","Choisissez la methode : WSM (rapide) ou TOPSIS (precis)","L'agent affiche le tableau comparatif avec scores et recommandation"],"suggestions":["Compare Salesforce, HubSpot et Pipedrive pour une PME en France","Quel CRM est le plus adapte pour 30 utilisateurs avec budget max 50 EUR/mois ?","Donne-moi un tableau comparatif des ERP cloud pour le marche marocain"],"livrable":"Tableau comparatif avec scores WSM/TOPSIS et recommandation classee"},
     {"id":"roi","name":"Agent ROI/TCO","icon":"\U0001f4b0","mission":"Je calcule le vrai cout et retour sur investissement","description":"Analyse TCO complete incluant les couts caches","color":"#059669","longDescription":"Le prix affiche d'un SaaS n'est jamais le vrai cout. Cet agent calcule le TCO en incluant migration, formation, support premium, et integrations. Il calcule aussi le ROI et projette le cout sur 5 ans.","steps":["Indiquez le prix mensuel du SaaS et le nombre d'utilisateurs","Renseignez les couts caches : migration, formation, support","Estimez le temps economise par employe (h/mois) et le cout horaire","L'agent calcule TCO, ROI%, Payback period et courbe d'amortissement sur 5 ans"],"suggestions":["Mon SaaS coute 45 EUR/user/mois pour 30 personnes, ca vaut le coup ?","Calcule le TCO d'un ERP avec 500 EUR de migration et 2h economisees par semaine","Sur 3 ans, quel est le vrai cout de Salesforce pour 15 commerciaux ?"],"livrable":"Rapport TCO/ROI avec graphique d'amortissement et verdict de rentabilite"},
     {"id":"conformite","name":"Agent Conformite","icon":"\U0001f512","mission":"Je verifie vos exigences de securite et conformite","description":"RGPD, CNDP, SLA et souverainete des donnees","color":"#dc2626","longDescription":"Cet agent analyse 6 points critiques : localisation des donnees, conformite RGPD/CNDP, certifications de securite, niveau de disponibilite SLA, reversibilite des donnees, et authentification.","steps":["Indiquez votre secteur d'activite et votre zone geographique (Maroc, France, UE...)","Posez vos questions sur la securite, le RGPD, le SLA ou la reversibilite","L'agent consulte sa base juridique (CNDP, RGPD, bonnes pratiques SLA)","Il genere un rapport de risques Vert/Orange/Rouge avec les questions a poser a l'editeur"],"suggestions":["Mon SaaS est heberge aux USA, est-ce conforme pour le Maroc ?","Quelles certifications de securite dois-je exiger a l'editeur ?","Que doit contenir la clause de reversibilite dans mon contrat SaaS ?"],"livrable":"Rapport de risques colore (Vert/Orange/Rouge) avec recommandations contractuelles"},
-    {"id":"deploiement","name":"Agent Deploiement","icon":"\U0001f680","mission":"Je genere votre plan de conduite du changement","description":"Deploiement progressif et formation des equipes","color":"#d97706","longDescription":"Cet agent cree un plan de deploiement progressif en 4 phases : pilote, formation, deploiement global, puis suivi d'adoption avec des KPIs. Il definit les responsables et le plan de communication interne.","steps":["Indiquez le nombre d'utilisateurs et la date cible de deploiement","Precisez le niveau de complexite de l'outil et les departements concernes","L'agent genere un plan en 4 phases avec durees et responsables","Il inclut les KPIs de succes et le plan de formation par profil utilisateur"],"suggestions":["Comment deployer un nouvel ERP pour 80 employes en 3 mois ?","Cree un plan de conduite du changement pour l'adoption de notre CRM","Quelles sont les etapes cles pour deployer un SaaS RH dans une PME ?"],"livrable":"Plan de deploiement en 4 phases avec timeline, responsables et KPIs"}
+    {"id":"deploiement","name":"Agent Deploiement","icon":"\U0001f680","mission":"Je genere votre plan de conduite du changement","description":"Deploiement progressif et formation des equipes","color":"#d97706","longDescription":"Cet agent cree un plan de deploiement progressif en 4 phases : pilote, formation, deploiement global, puis suivi d'adoption avec des KPIs. Il definit les responsables et le plan de communication interne.","steps":["Indiquez le nombre d'utilisateurs et la date cible de deploiement","Precisez le niveau de complexite de l'outil et les departements concernes","L'agent genere un plan en 4 phases avec durees et responsables","Il inclut les KPIs de succes et le plan de formation par profil utilisateur"],"suggestions":["Comment deployer un nouvel ERP pour 80 employes en 3 mois ?","Cree un plan de conduite du changement pour l'adoption de notre CRM","Quelles sont les etapes cles pour deployer un SaaS RH dans une PME ?"],"livrable":"Plan de deploiement en 4 phases avec timeline, responsables et KPIs"},
+    {"id":"taxonomie","name":"Agent Taxonomie","icon":"\U0001f3db","mission":"Je vous aide a classifier un batiment selon la reglementation","description":"Classification reglementaire ERP, Habitation, ERT, EIC","color":"#2563eb","longDescription":"Cet agent vous aide a determiner la classification reglementaire exacte de votre batiment a partir de ses caracteristiques (usage, nombre d'etages, effectif, hauteur). Il s'appuie sur la Taxonomie Batiment V1 qui couvre les Habitations, ERP, ERT et EIC avec les seuils reglementaires.","steps":["Decrivez votre batiment : usage (habitation, ERP, ERT, EIC), nombre d'etages, effectif accueilli, hauteur PBDN","L'agent consulte la taxonomie reglementaire","Il determine la classe (BH 1re famille, ERP 1re cat, IGH, etc.)","Il fournit les seuils reglementaires applicables et les points de vigilance"],"suggestions":["Quelle est la classification d'un immeuble d'habitation de 6 etages ?","Un ERP de type M de 400 personnes, quelle categorie ?","Mon batiment fait 35 m de hauteur avec des bureaux, suis-je en IGH ?"],"livrable":"Fiche de classification reglementaire complete avec les seuils et references"}
 ]
 
 CREATOR_AGENTS = [
@@ -83,6 +84,34 @@ _AGENT_SYSTEMS = {
         "Code couleur pour chaque point : Risque Faible (vert) / Moyen (orange) / Eleve (rouge).\n"
         "Liste les 3 questions prioritaires a poser a l'editeur.\n"
         "IMPORTANT : Commence par demander la zone geographique et le secteur d'activite."
+    ),
+    "taxonomie": (
+        "Tu es Agent Taxonomie, expert en classification reglementaire des batiments au Maroc.\n\n"
+        "Tu disposes de la Taxonomie Batiment V1 (Réglementation Marocaine) qui couvre 4 domaines :\n"
+        "1. Habitation (Individuelle, Collective, Grande Hauteur, Tres Grande Hauteur)\n"
+        "   - BH 1re famille : ≤ R+1, maisons isolees/jumelees\n"
+        "   - BH 2e famille : > R+1, maisons en bande, collectifs ≤ R+3\n"
+        "   - BH 3e famille A : ≤ R+7 ou PBDN ≤ 28 m\n"
+        "   - BH 4e famille : 28 m < PBDN ≤ 50 m\n"
+        "   - GHA (IGH) : PBDN > 50 m\n"
+        "   - ITGH : PBDN > 200 m\n\n"
+        "2. ERP (Etablissements Recevant du Public)\n"
+        "   - Types J a Y avec seuils d'effectif (100 a 500 selon le type)\n"
+        "   - 1re categorie : > 1500 personnes\n"
+        "   - 2e categorie : 701 a 1500 personnes\n"
+        "   - 3e categorie : 301 a 700 personnes\n"
+        "   - 4e categorie : ≤ 300 personnes\n"
+        "   - 5e categorie : petits ERP sous les seuils\n"
+        "   - IGH/ITGH pour ERP : PBDN > 28 m / 200 m\n\n"
+        "3. ERT (Etablissements Recevant des Travailleurs) : bureaux, ateliers, entrepots\n"
+        "4. EIC (Etablissements et Installations Classes) : ICPE\n\n"
+        "Pour chaque consultation :\n"
+        "- Identifie TOUS les criteres : usage, nombre d'etages, effectif, hauteur PBDN, superficie\n"
+        "- Croise avec les seuils de la taxonomie pour trouver la classification exacte\n"
+        "- Presente le resultat avec : classification, seuils applicables, sources reglementaires\n"
+        "- Ajoute les points de vigilance et les questions a poser a un bureau de controle\n\n"
+        "IMPORTANT : Demande l'usage exact du batiment, le nombre d'etages/niveaux, "
+        "et l'effectif accueilli si non fournis."
     ),
     "deploiement": (
         "Tu es Agent Deploiement, expert en gestion du changement et deploiement SaaS.\n\n"

@@ -38,7 +38,7 @@ def chatbot(question: str, history: list = None, agent_type: str = None) -> str:
     )
 
     AGENT_TYPES_ALL = (
-        "cadrage", "comparateur", "roi", "conformite", "deploiement",
+        "cadrage", "comparateur", "roi", "conformite", "deploiement", "taxonomie",
         "pitch", "swot", "mrr", "canvas", "radar"
     )
 

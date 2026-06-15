@@ -76,6 +76,13 @@
 
             <!-- Boutons mode Cr&eacute;ateur -->
             <div style="display:flex;gap:8px;align-items:center;" id="headerBtnsCreateur">
+                <button class="btn-taxo" onclick="document.getElementById('taxoModal').style.display='flex'" title="Taxonomie Bâtiment">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+                    </svg>
+                    Taxonomie
+                </button>
                 <button class="btn-predict-hdr" onclick="openPredictPanel()" title="Pr&eacute;dictions IA">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"/>
@@ -144,6 +151,13 @@
                         <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
                     </svg>
                     Architecture IA
+                </button>
+                <button class="btn-taxo" onclick="document.getElementById('taxoModal').style.display='flex'" title="Taxonomie Bâtiment">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+                    </svg>
+                    Taxonomie
                 </button>
                 <button class="btn-clear" id="btnClearAcheteur" title="Vider la conversation" style="display:none;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -377,6 +391,61 @@
         <p style="font-size:11px;color:#9ca3af;text-align:center;margin-top:16px;">
             Architecture neuro-symbolique hybride &mdash; XAI garanti par la couche MCDM
         </p>
+    </div>
+</div>
+
+<!-- Taxonomie Bâtiment Modal -->
+<div class="modal-overlay" id="taxoModal" style="display:none;">
+    <div class="modal" style="width:600px;max-width:95vw;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h3 style="margin:0;">🏛 Taxonomie Bâtiment</h3>
+            <button class="btn-cancel" style="padding:4px 12px;" onclick="document.getElementById('taxoModal').style.display='none'">&times;</button>
+        </div>
+
+        <!-- Mode 1 : Classification intelligente -->
+        <div style="margin-bottom:16px;">
+            <div style="font-size:14px;font-weight:600;margin-bottom:8px;">🔍 Classification intelligente</div>
+            <div style="display:flex;gap:8px;">
+                <input type="text" id="taxoQuery" placeholder="Décrivez le bâtiment : usage, étages, effectif, hauteur..." style="flex:1;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+                <button class="btn-confirm" onclick="classifyTaxonomie()" id="btnTaxoRun">Classifier</button>
+            </div>
+        </div>
+
+        <div id="taxoLoader" style="display:none;text-align:center;padding:20px;color:#6b7280;">
+            <div class="typing-bubble"><span></span><span></span><span></span></div>
+            <div style="margin-top:8px;font-size:13px;">Analyse en cours...</div>
+        </div>
+
+        <div id="taxoResult" style="display:none;"></div>
+
+        <div style="border-top:1px solid #e5e7eb;margin:16px 0 12px;"></div>
+
+        <!-- Mode 3 : Recommandation terrain -->
+        <div style="margin-bottom:16px;">
+            <div style="font-size:14px;font-weight:600;margin-bottom:8px;">📐 Plans bâtiment &mdash; RAG &gt; ML &gt; MCDM &gt; Conformité</div>
+            <div style="display:flex;gap:8px;">
+                <input type="text" id="taxoRecomQuery" placeholder="Décrivez le terrain : surface, localisation, budget..." style="flex:1;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+                <button class="btn-confirm" style="background:#2563eb;" onclick="recommendTaxonomie()" id="btnRecomRun">Analyser</button>
+            </div>
+        </div>
+        <div id="taxoRecomLoader" style="display:none;text-align:center;padding:20px;color:#6b7280;">
+            <div class="typing-bubble"><span></span><span></span><span></span></div>
+            <div style="margin-top:8px;font-size:13px;">Analyse en cours (RAG + ML + MCDM)...</div>
+        </div>
+        <div id="taxoRecomResult" style="display:none;"></div>
+
+        <div style="border-top:1px solid #e5e7eb;margin:16px 0 12px;"></div>
+
+        <!-- Mode 2 : Explorateur de l'arbre -->
+        <div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:8px;">🌳 Explorateur de la taxonomie</div>
+            <button class="btn-confirm" style="background:#2563eb;" onclick="loadTaxonomyTree()" id="btnTreeLoad">Charger l'arbre complet</button>
+            <div id="taxoTree" style="margin-top:12px;max-height:300px;overflow-y:auto;display:none;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;font-size:12px;"></div>
+        </div>
+
+        <div class="modal-actions" style="margin-top:16px;">
+            <button class="btn-cancel" onclick="document.getElementById('taxoModal').style.display='none'">Fermer</button>
+        </div>
     </div>
 </div>
 
@@ -1232,6 +1301,208 @@ function renderAuditResult(data){
     '<div class="audit-badges">'+badgesHtml+'</div>' +
     compHtml+reportHtml +
     '<div style="font-size:10px;color:#9ca3af;margin-top:10px;">Durée d\'analyse : '+(data.duration_ms||0)+'ms</div>';
+}
+
+/* ============================================================
+   Taxonomie Bâtiment - Classification
+   ============================================================ */
+function classifyTaxonomie() {
+    var query = document.getElementById('taxoQuery').value.trim();
+    if (!query) { alert('Veuillez décrire le bâtiment.'); return; }
+    document.getElementById('taxoLoader').style.display = 'block';
+    document.getElementById('taxoResult').style.display = 'none';
+    document.getElementById('btnTaxoRun').disabled = true;
+    fetch('/api/taxonomie/classify', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ query: query, top_k: 5 })
+    }).then(function(r){ return r.json(); }).then(function(data){
+        document.getElementById('taxoLoader').style.display = 'none';
+        document.getElementById('btnTaxoRun').disabled = false;
+        if (data.error) {
+            document.getElementById('taxoResult').innerHTML = '<p style="color:#ef4444;">' + escapeHtml(data.error) + '</p>';
+            document.getElementById('taxoResult').style.display = 'block';
+            return;
+        }
+        var html = '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;margin-bottom:8px;">' +
+            '<strong style="font-size:13px;">🏷 Classifications trouvées : ' + data.count + '</strong></div>';
+        (data.classifications || []).forEach(function(c){
+            var scoreColor = c.score > 0.4 ? '#059669' : (c.score > 0.2 ? '#d97706' : '#6b7280');
+            html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;margin-bottom:8px;">' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+                '<strong style="font-size:13px;color:' + scoreColor + ';">' + escapeHtml(c.sous_domaine + ' | ' + c.categorie) + '</strong>' +
+                '<span style="font-size:11px;background:' + scoreColor + ';color:#fff;padding:2px 8px;border-radius:10px;">' + (c.score * 100).toFixed(0) + '%</span></div>' +
+                '<div style="font-size:12px;color:#6b7280;">' + escapeHtml(c.caracteristiques) + '</div>' +
+                '<div style="font-size:10px;color:#9ca3af;margin-top:4px;">' + escapeHtml(c.source) + '</div></div>';
+        });
+        if (data.classifications.length === 0) {
+            html += '<p style="color:#6b7280;font-size:13px;">Aucune classification trouvée. Essayez une description plus précise.</p>';
+        }
+        document.getElementById('taxoResult').innerHTML = html;
+        document.getElementById('taxoResult').style.display = 'block';
+    }).catch(function(){
+        document.getElementById('taxoLoader').style.display = 'none';
+        document.getElementById('btnTaxoRun').disabled = false;
+        document.getElementById('taxoResult').innerHTML = '<p style="color:#ef4444;">Erreur lors de la classification.</p>';
+        document.getElementById('taxoResult').style.display = 'block';
+    });
+}
+
+/* ============================================================
+   Taxonomie Bâtiment - Recommandation (RAG > ML > MCDM > Conformité)
+   ============================================================ */
+function recommendTaxonomie() {
+    var query = document.getElementById('taxoRecomQuery').value.trim();
+    if (!query) { alert('Veuillez décrire le terrain.'); return; }
+    document.getElementById('taxoRecomLoader').style.display = 'block';
+    document.getElementById('taxoRecomResult').style.display = 'none';
+    document.getElementById('btnRecomRun').disabled = true;
+    fetch('/api/taxonomie/recommend', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ query: query, method: 'wsm' })
+    }).then(function(r){ return r.json(); }).then(function(data){
+        document.getElementById('taxoRecomLoader').style.display = 'none';
+        document.getElementById('btnRecomRun').disabled = false;
+        if (data.error) {
+            document.getElementById('taxoRecomResult').innerHTML = '<p style="color:#ef4444;">' + escapeHtml(data.error) + '</p>';
+            document.getElementById('taxoRecomResult').style.display = 'block';
+            return;
+        }
+        var html = '';
+
+        // Résumé terrain
+        var t = data.terrain || {};
+        html += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;margin-bottom:12px;">' +
+            '<strong style="font-size:13px;">📋 Terrain</strong>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:12px;">';
+        if (t.surface_m2) html += '<span style="background:#e0f2fe;padding:3px 10px;border-radius:12px;">' + t.surface_m2 + ' m²</span>';
+        if (t.localisation) html += '<span style="background:#e0f2fe;padding:3px 10px;border-radius:12px;">' + escapeHtml(t.localisation) + '</span>';
+        if (t.usage_souhaite) html += '<span style="background:#e0f2fe;padding:3px 10px;border-radius:12px;">' + escapeHtml(t.usage_souhaite) + '</span>';
+        if (t.budget_estime_dh) html += '<span style="background:#e0f2fe;padding:3px 10px;border-radius:12px;">Budget: ' + t.budget_estime_dh.toLocaleString('fr-FR') + ' DH</span>';
+        html += '</div></div>';
+
+        // Plans classés
+        var plans = data.plans || [];
+        if (plans.length === 0) {
+            html += '<p style="color:#6b7280;">Aucun plan généré. Essayez une description différente.</p>';
+        }
+        plans.forEach(function(p, i){
+            var rankColors = ['#fbbf24','#9ca3af','#d97706','#6b7280','#6b7280'];
+            var rankColor = rankColors[i] || '#6b7280';
+            var isRec = p.mcdm_recommended ? '<span style="background:#059669;color:#fff;padding:2px 8px;border-radius:8px;font-size:10px;margin-left:6px;">RECOMMANDÉ</span>' : '';
+
+            html += '<div style="background:#fff;border:2px solid ' + (isRec ? '#059669' : '#e5e7eb') + ';border-radius:10px;padding:12px;margin-bottom:10px;">' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+                '<div><strong style="font-size:14px;">#' + p.rank + ' ' + escapeHtml(p.name) + '</strong>' + isRec + '</div>' +
+                '<div style="background:' + rankColor + ';color:#fff;font-weight:bold;font-size:14px;padding:2px 10px;border-radius:12px;">' + (p.mcdm_score * 100).toFixed(0) + '%</div></div>' +
+                '<div style="font-size:12px;color:#6b7280;margin-bottom:8px;">' + escapeHtml(p.description || '') + '</div>';
+
+            // Détails techniques
+            html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-size:11px;">';
+            if (p.type) html += '<span style="background:#f3f4f6;padding:2px 8px;border-radius:8px;">' + escapeHtml(p.type) + '</span>';
+            if (p.nb_etages) html += '<span style="background:#f3f4f6;padding:2px 8px;border-radius:8px;">' + p.nb_etages + ' étages</span>';
+            if (p.surface_utile_m2) html += '<span style="background:#f3f4f6;padding:2px 8px;border-radius:8px;">' + p.surface_utile_m2 + ' m² utiles</span>';
+            if (p.cout_estime_dh) html += '<span style="background:#f3f4f6;padding:2px 8px;border-radius:8px;">' + Number(p.cout_estime_dh).toLocaleString('fr-FR') + ' DH</span>';
+            if (p.delai_mois) html += '<span style="background:#f3f4f6;padding:2px 8px;border-radius:8px;">' + p.delai_mois + ' mois</span>';
+            html += '</div>';
+
+            // Scores MCDM
+            var cv = p.criteria_values || {};
+            html += '<div style="font-size:11px;color:#374151;background:#f9fafb;padding:8px;border-radius:6px;margin-bottom:6px;">';
+            html += '<strong>Scores MCDM :</strong> ';
+            Object.keys(cv).forEach(function(k){
+                var labels = {
+                    surface_utilisable: 'Surface','cout_estime': 'Coût','conformite_reglementaire': 'Conformité',
+                    faisabilite_technique: 'Faisabilité','delai_realisation': 'Délai','ml_viability_score': 'ML Viability'
+                };
+                html += '<span style="margin-right:10px;">' + (labels[k] || k) + ': ' + cv[k] + '</span>';
+            });
+            html += '</div>';
+
+            // ML Predictions
+            var ml = p.ml_predictions || {};
+            var preds = ml.predictions || {};
+            var predKeys = Object.keys(preds);
+            if (predKeys.length > 0) {
+                html += '<details style="font-size:11px;margin-bottom:6px;"><summary style="cursor:pointer;color:#6366f1;">🤖 Prédictions IA (' + predKeys.length + ')</summary>';
+                predKeys.forEach(function(task){
+                    var r = preds[task];
+                    if (r && r.label) {
+                        html += '<div style="display:flex;justify-content:space-between;padding:2px 8px;background:#eef2ff;margin:2px 0;border-radius:4px;">' +
+                            '<span>' + task + '</span><span><strong>' + r.label + '</strong> (' + r.confidence + '%)</span></div>';
+                    }
+                });
+                html += '</details>';
+            }
+
+            // Conformité
+            var conf = p.conformite || {};
+            if (conf.verdict) {
+                var isSafe = conf.verdict.indexOf('✅') >= 0 || conf.verdict.indexOf('Faible') >= 0;
+                var isWarn = conf.verdict.indexOf('⚠️') >= 0 || conf.verdict.indexOf('Moyen') >= 0;
+                var borderColor = isSafe ? '#bbf7d0' : (isWarn ? '#fde68a' : '#fecaca');
+                html += '<details style="font-size:11px;"><summary style="cursor:pointer;color:' + (isSafe ? '#059669' : (isWarn ? '#d97706' : '#ef4444')) + ';">🔒 Conformité réglementaire</summary>' +
+                    '<div style="background:#fefefe;border:1px solid ' + borderColor + ';border-radius:6px;padding:8px;margin-top:4px;">' +
+                    renderMarkdown(conf.verdict) + '</div></details>';
+            }
+
+            html += '</div>';
+        });
+
+        // Résumé MCDM
+        var mcdm = data.mcdm || {};
+        html += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px;margin-top:4px;font-size:11px;color:#374151;">' +
+            '<strong>Méthode :</strong> ' + (mcdm.method || 'WSM').toUpperCase() +
+            ' &nbsp;|&nbsp; <strong>Poids :</strong> ' + (mcdm.weights_used ? Object.values(mcdm.weights_used).map(function(w){ return (w*100).toFixed(0)+'%'; }).join(' / ') : '') +
+            '</div>';
+
+        document.getElementById('taxoRecomResult').innerHTML = html;
+        document.getElementById('taxoRecomResult').style.display = 'block';
+    }).catch(function(){
+        document.getElementById('taxoRecomLoader').style.display = 'none';
+        document.getElementById('btnRecomRun').disabled = false;
+        document.getElementById('taxoRecomResult').innerHTML = '<p style="color:#ef4444;">Erreur lors de l\'analyse.</p>';
+        document.getElementById('taxoRecomResult').style.display = 'block';
+    });
+}
+
+/* ============================================================
+   Taxonomie Bâtiment - Arbre
+   ============================================================ */
+function loadTaxonomyTree() {
+    document.getElementById('btnTreeLoad').disabled = true;
+    document.getElementById('btnTreeLoad').textContent = 'Chargement...';
+    document.getElementById('taxoTree').style.display = 'block';
+    document.getElementById('taxoTree').innerHTML = '<div style="text-align:center;color:#6b7280;padding:10px;">Chargement...</div>';
+    fetch('/api/taxonomie/tree').then(function(r){ return r.json(); }).then(function(data){
+        document.getElementById('btnTreeLoad').disabled = false;
+        document.getElementById('btnTreeLoad').textContent = 'Charger l\'arbre complet';
+        if (data.error) {
+            document.getElementById('taxoTree').innerHTML = '<p style="color:#ef4444;">' + escapeHtml(data.error) + '</p>';
+            return;
+        }
+        var html = '<div style="font-size:11px;color:#6b7280;margin-bottom:8px;">' + data.count_entries + ' entrées réglementaires</div>';
+        (data.domaines || []).forEach(function(dom){
+            html += '<div style="margin-bottom:10px;">' +
+                '<div style="font-weight:600;font-size:13px;color:#1d4ed8;margin-bottom:4px;">📁 ' + escapeHtml(dom.nom) + '</div>';
+            (dom.sous_domaines || []).forEach(function(sd){
+                html += '<div style="margin-left:16px;margin-bottom:6px;">' +
+                    '<div style="font-weight:500;font-size:12px;color:#374151;">▸ ' + escapeHtml(sd.nom) + ' <span style="color:#9ca3af;">(' + sd.entrees.length + ')</span></div>';
+                (sd.entrees || []).forEach(function(e){
+                    html += '<div style="margin-left:20px;font-size:11px;color:#6b7280;padding:2px 0;">' +
+                        '• <strong>' + escapeHtml(e.categorie) + '</strong> — ' + escapeHtml(e.caracteristiques) + '</div>';
+                });
+                html += '</div>';
+            });
+            html += '</div>';
+        });
+        document.getElementById('taxoTree').innerHTML = html;
+    }).catch(function(){
+        document.getElementById('btnTreeLoad').disabled = false;
+        document.getElementById('btnTreeLoad').textContent = 'Charger l\'arbre complet';
+        document.getElementById('taxoTree').innerHTML = '<p style="color:#ef4444;">Erreur lors du chargement.</p>';
+    });
 }
 </script>
 
