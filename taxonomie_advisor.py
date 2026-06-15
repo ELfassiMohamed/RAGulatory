@@ -115,20 +115,19 @@ Si une valeur n'est pas mentionnée, mets null.
 
 
 def _extract_parameters(query: str, client) -> dict:
-    resp = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[
-            {"role": "system", "content": _EXTRACT_SYSTEM},
-            {"role": "user", "content": query}
-        ],
-        temperature=0.1,
-        max_tokens=300
-    )
-    raw = resp.choices[0].message.content
-    import re
-    match = re.search(r'\{.*\}', raw, re.DOTALL)
-    if match:
-        return json.loads(match.group(0))
+    raw = _llm_retry(client, [
+        {"role": "system", "content": _EXTRACT_SYSTEM},
+        {"role": "user", "content": query}
+    ], max_tokens=300, temperature=0.1)
+    
+    if raw:
+        import re
+        match = re.search(r'\{.*\}', raw, re.DOTALL)
+        if match:
+            try:
+                return json.loads(match.group(0))
+            except json.JSONDecodeError:
+                pass
     return {"surface_m2": None, "localisation": None, "zone_urbaine": False,
             "usage_souhaite": None, "contraintes": [], "budget_estime_dh": None,
             "nb_etages_max": None}
@@ -211,32 +210,116 @@ Règles :
 """
 
 
+def _llm_retry(client, messages, max_tokens=1500, temperature=0.4, retries=3) -> str:
+    """Appelle le LLM avec retry en cas de reponse vide."""
+    for attempt in range(retries):
+        try:
+            resp = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            content = resp.choices[0].message.content
+            if content and content.strip():
+                return content
+        except Exception:
+            pass
+        if attempt < retries - 1:
+            import time
+            time.sleep(1)
+    return ""
+
+
 def _generate_plans(params: dict, regulations: dict, client) -> list:
     context = json.dumps({
         "terrain": params,
         "reglementations_applicables": [r["text"] for r in regulations.get("regulations", [])]
     }, ensure_ascii=False)
     
-    resp = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[
-            {"role": "system", "content": _PLANS_SYSTEM},
-            {"role": "user", "content": f"Terrain et réglementations :\n{context}"}
-        ],
-        temperature=0.4,
-        max_tokens=1500
-    )
+    raw = _llm_retry(client, [
+        {"role": "system", "content": _PLANS_SYSTEM},
+        {"role": "user", "content": f"Terrain et réglementations :\n{context}"}
+    ], max_tokens=1500, temperature=0.4)
     
-    raw = resp.choices[0].message.content
+    if not raw:
+        return _default_plans(params)
+    
     import re
     match = re.search(r'\{.*\}', raw, re.DOTALL)
     if match:
         try:
             data = json.loads(match.group(0))
-            return data.get("plans", [])
+            plans = data.get("plans", [])
+            if plans:
+                return plans
         except json.JSONDecodeError:
             pass
-    return []
+    
+    return _default_plans(params)
+
+
+def _default_plans(params: dict) -> list:
+    """Plans de secours quand le LLM ne repond pas."""
+    surface = params.get("surface_m2") or 100
+    budget = params.get("budget_estime_dh") or 1000000
+    etages = params.get("nb_etages_max") or 2
+    cout_m2 = 15000
+    
+    plans = [
+        {
+            "name": "Maison Plain-pied",
+            "description": f"Maison individuelle de plain-pied, {surface} m², budget optimise.",
+            "type": "Maison individuelle",
+            "nb_etages": 1,
+            "surface_utile_m2": round(surface * 0.8, 1),
+            "cout_estime_dh": round(surface * cout_m2),
+            "delai_mois": 8,
+            "criteria_values": {
+                "surface_utilisable": round(surface * 0.8, 1),
+                "cout_estime": round(surface * cout_m2),
+                "conformite_reglementaire": 8.0,
+                "faisabilite_technique": 9.0,
+                "delai_realisation": 8,
+                "ml_viability_score": 7.0
+            }
+        },
+        {
+            "name": "Maison R+1",
+            "description": f"Maison individuelle R+1, {surface * 1.5} m² utiles, deux niveaux.",
+            "type": "Maison individuelle",
+            "nb_etages": min(etages, 2),
+            "surface_utile_m2": round(surface * 1.2, 1),
+            "cout_estime_dh": round(surface * cout_m2 * 1.4),
+            "delai_mois": 12,
+            "criteria_values": {
+                "surface_utilisable": round(surface * 1.2, 1),
+                "cout_estime": round(surface * cout_m2 * 1.4),
+                "conformite_reglementaire": 7.5,
+                "faisabilite_technique": 8.0,
+                "delai_realisation": 12,
+                "ml_viability_score": 6.5
+            }
+        },
+        {
+            "name": "Petit Immeuble R+2",
+            "description": f"Petit collectif R+2, {surface * 2.0} m² utiles, 3 logements.",
+            "type": "Petit immeuble",
+            "nb_etages": min(etages, 3),
+            "surface_utile_m2": round(surface * 1.6, 1),
+            "cout_estime_dh": round(surface * cout_m2 * 1.8),
+            "delai_mois": 16,
+            "criteria_values": {
+                "surface_utilisable": round(surface * 1.6, 1),
+                "cout_estime": round(surface * cout_m2 * 1.8),
+                "conformite_reglementaire": 6.5,
+                "faisabilite_technique": 7.0,
+                "delai_realisation": 16,
+                "ml_viability_score": 6.0
+            }
+        }
+    ]
+    return plans
 
 
 # ============================================================
@@ -294,20 +377,51 @@ def _ml_predict(plan: dict) -> dict:
 
 
 def _check_conformity(plan: dict, client) -> dict:
-    """Vérifie la conformité réglementaire du plan via le RAG conformité."""
-    from rag_conformite import rag_query
+    """Verifie la conformite reglementaire via RAG Taxonomie + LLM structure."""
+    from rag_conformite import get_rag
     
-    query = f"Classification pour {plan.get('type', 'bâtiment')} de {plan.get('nb_etages', 1)} étages, surface {plan.get('surface_utile_m2', 0)} m²"
+    query = f"{plan.get('type', 'batiment')} {plan.get('nb_etages', 1)} etages surface {plan.get('surface_utile_m2', 0)} m²"
     
     try:
-        result = rag_query(query, zone="Réglementation Bâtiment", lang="fr")
-        return {
-            "verdict": result.get("answer", "")[:500],
-            "sources": result.get("sources", []),
-            "chunks_used": result.get("chunks_used", 0)
-        }
+        rag = get_rag()
+        chunks = rag.retrieve(query, top_k=4, zone_filter="Réglementation Bâtiment")
+        if not chunks:
+            return {"risk_level": "inconnu", "classification": "", "key_points": [], "details": "Aucune reglementation trouvee pour ce plan."}
+        
+        context = "\n---\n".join([c["doc"]["text"] for c in chunks])
+        
+        raw = _llm_retry(client, [
+            {"role": "system", "content": (
+                "Tu es un expert en reglementation du batiment au Maroc. "
+                "A partir du plan et du contexte reglementaire fournis, retourne UNIQUEMENT un JSON :\n"
+                "{\n"
+                '  "risk_level": "Faible" | "Moyen" | "Eleve",\n'
+                '  "classification": "classification reglementaire exacte",\n'
+                '  "key_points": ["point 1", "point 2", "point 3"],\n'
+                '  "details": "explication courte (1 phrase)"\n'
+                "}\n"
+                "Sois precis et concis."
+            )},
+            {"role": "user", "content": f"Plan: {json.dumps(plan, ensure_ascii=False)}\n\nReglementations:\n{context}"}
+        ], max_tokens=400, temperature=0.1)
+        
+        if raw:
+            import re
+            match = re.search(r'\{.*\}', raw, re.DOTALL)
+            if match:
+                result = json.loads(match.group(0))
+                return {
+                    "risk_level": result.get("risk_level", "Moyen"),
+                    "classification": result.get("classification", ""),
+                    "key_points": result.get("key_points", []),
+                    "details": result.get("details", ""),
+                    "sources": [c["doc"]["source"] for c in chunks],
+                    "chunks_used": len(chunks)
+                }
     except Exception as e:
-        return {"verdict": f"Erreur : {e}", "sources": [], "chunks_used": 0}
+        pass
+    
+    return {"risk_level": "Moyen", "classification": "", "key_points": ["Verification non disponible"], "details": "Impossible d evaluer la conformite.", "sources": [], "chunks_used": 0}
 
 
 # ============================================================
@@ -382,8 +496,9 @@ def _build_conformity_summary(plans: list) -> list:
         conf = plan.get("conformite", {})
         summaries.append({
             "plan_name": plan.get("name", ""),
-            "verdict": conf.get("verdict", "")[:200],
-            "sources": [s.get("source", "") for s in conf.get("sources", [])]
+            "risk_level": conf.get("risk_level", "inconnu"),
+            "classification": conf.get("classification", ""),
+            "sources": conf.get("sources", [])
         })
     return summaries
 

@@ -396,33 +396,15 @@
 
 <!-- Taxonomie Bâtiment Modal -->
 <div class="modal-overlay" id="taxoModal" style="display:none;">
-    <div class="modal" style="width:600px;max-width:95vw;">
+    <div class="modal" style="width:800px;max-width:95vw;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <h3 style="margin:0;">🏛 Taxonomie Bâtiment</h3>
+            <h3 style="margin:0;">Taxonomie Batiment</h3>
             <button class="btn-cancel" style="padding:4px 12px;" onclick="document.getElementById('taxoModal').style.display='none'">&times;</button>
         </div>
 
-        <!-- Mode 1 : Classification intelligente -->
+        <!-- Recommandation terrain -->
         <div style="margin-bottom:16px;">
-            <div style="font-size:14px;font-weight:600;margin-bottom:8px;">🔍 Classification intelligente</div>
-            <div style="display:flex;gap:8px;">
-                <input type="text" id="taxoQuery" placeholder="Décrivez le bâtiment : usage, étages, effectif, hauteur..." style="flex:1;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
-                <button class="btn-confirm" onclick="classifyTaxonomie()" id="btnTaxoRun">Classifier</button>
-            </div>
-        </div>
-
-        <div id="taxoLoader" style="display:none;text-align:center;padding:20px;color:#6b7280;">
-            <div class="typing-bubble"><span></span><span></span><span></span></div>
-            <div style="margin-top:8px;font-size:13px;">Analyse en cours...</div>
-        </div>
-
-        <div id="taxoResult" style="display:none;"></div>
-
-        <div style="border-top:1px solid #e5e7eb;margin:16px 0 12px;"></div>
-
-        <!-- Mode 3 : Recommandation terrain -->
-        <div style="margin-bottom:16px;">
-            <div style="font-size:14px;font-weight:600;margin-bottom:8px;">📐 Plans bâtiment &mdash; RAG &gt; ML &gt; MCDM &gt; Conformité</div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Analyse Terrain > Plans > Conformite</div>
             <div style="display:flex;gap:8px;">
                 <input type="text" id="taxoRecomQuery" placeholder="Décrivez le terrain : surface, localisation, budget..." style="flex:1;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
                 <button class="btn-confirm" style="background:#2563eb;" onclick="recommendTaxonomie()" id="btnRecomRun">Analyser</button>
@@ -432,16 +414,7 @@
             <div class="typing-bubble"><span></span><span></span><span></span></div>
             <div style="margin-top:8px;font-size:13px;">Analyse en cours (RAG + ML + MCDM)...</div>
         </div>
-        <div id="taxoRecomResult" style="display:none;"></div>
-
-        <div style="border-top:1px solid #e5e7eb;margin:16px 0 12px;"></div>
-
-        <!-- Mode 2 : Explorateur de l'arbre -->
-        <div>
-            <div style="font-size:14px;font-weight:600;margin-bottom:8px;">🌳 Explorateur de la taxonomie</div>
-            <button class="btn-confirm" style="background:#2563eb;" onclick="loadTaxonomyTree()" id="btnTreeLoad">Charger l'arbre complet</button>
-            <div id="taxoTree" style="margin-top:12px;max-height:300px;overflow-y:auto;display:none;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;font-size:12px;"></div>
-        </div>
+        <div id="taxoRecomResult" style="display:none;max-height:480px;overflow-y:auto;padding-right:4px;"></div>
 
         <div class="modal-actions" style="margin-top:16px;">
             <button class="btn-cancel" onclick="document.getElementById('taxoModal').style.display='none'">Fermer</button>
@@ -1304,52 +1277,7 @@ function renderAuditResult(data){
 }
 
 /* ============================================================
-   Taxonomie Bâtiment - Classification
-   ============================================================ */
-function classifyTaxonomie() {
-    var query = document.getElementById('taxoQuery').value.trim();
-    if (!query) { alert('Veuillez décrire le bâtiment.'); return; }
-    document.getElementById('taxoLoader').style.display = 'block';
-    document.getElementById('taxoResult').style.display = 'none';
-    document.getElementById('btnTaxoRun').disabled = true;
-    fetch('/api/taxonomie/classify', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ query: query, top_k: 5 })
-    }).then(function(r){ return r.json(); }).then(function(data){
-        document.getElementById('taxoLoader').style.display = 'none';
-        document.getElementById('btnTaxoRun').disabled = false;
-        if (data.error) {
-            document.getElementById('taxoResult').innerHTML = '<p style="color:#ef4444;">' + escapeHtml(data.error) + '</p>';
-            document.getElementById('taxoResult').style.display = 'block';
-            return;
-        }
-        var html = '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;margin-bottom:8px;">' +
-            '<strong style="font-size:13px;">🏷 Classifications trouvées : ' + data.count + '</strong></div>';
-        (data.classifications || []).forEach(function(c){
-            var scoreColor = c.score > 0.4 ? '#059669' : (c.score > 0.2 ? '#d97706' : '#6b7280');
-            html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;margin-bottom:8px;">' +
-                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
-                '<strong style="font-size:13px;color:' + scoreColor + ';">' + escapeHtml(c.sous_domaine + ' | ' + c.categorie) + '</strong>' +
-                '<span style="font-size:11px;background:' + scoreColor + ';color:#fff;padding:2px 8px;border-radius:10px;">' + (c.score * 100).toFixed(0) + '%</span></div>' +
-                '<div style="font-size:12px;color:#6b7280;">' + escapeHtml(c.caracteristiques) + '</div>' +
-                '<div style="font-size:10px;color:#9ca3af;margin-top:4px;">' + escapeHtml(c.source) + '</div></div>';
-        });
-        if (data.classifications.length === 0) {
-            html += '<p style="color:#6b7280;font-size:13px;">Aucune classification trouvée. Essayez une description plus précise.</p>';
-        }
-        document.getElementById('taxoResult').innerHTML = html;
-        document.getElementById('taxoResult').style.display = 'block';
-    }).catch(function(){
-        document.getElementById('taxoLoader').style.display = 'none';
-        document.getElementById('btnTaxoRun').disabled = false;
-        document.getElementById('taxoResult').innerHTML = '<p style="color:#ef4444;">Erreur lors de la classification.</p>';
-        document.getElementById('taxoResult').style.display = 'block';
-    });
-}
-
-/* ============================================================
-   Taxonomie Bâtiment - Recommandation (RAG > ML > MCDM > Conformité)
+   Taxonomie Batiment - Recommendation (RAG > ML > MCDM > Conformite)
    ============================================================ */
 function recommendTaxonomie() {
     var query = document.getElementById('taxoRecomQuery').value.trim();
@@ -1371,94 +1299,137 @@ function recommendTaxonomie() {
         }
         var html = '';
 
-        // Résumé terrain
+        // Resume terrain (bigger)
         var t = data.terrain || {};
-        html += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;margin-bottom:12px;">' +
-            '<strong style="font-size:13px;">📋 Terrain</strong>' +
-            '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:12px;">';
-        if (t.surface_m2) html += '<span style="background:#e0f2fe;padding:3px 10px;border-radius:12px;">' + t.surface_m2 + ' m²</span>';
-        if (t.localisation) html += '<span style="background:#e0f2fe;padding:3px 10px;border-radius:12px;">' + escapeHtml(t.localisation) + '</span>';
-        if (t.usage_souhaite) html += '<span style="background:#e0f2fe;padding:3px 10px;border-radius:12px;">' + escapeHtml(t.usage_souhaite) + '</span>';
-        if (t.budget_estime_dh) html += '<span style="background:#e0f2fe;padding:3px 10px;border-radius:12px;">Budget: ' + t.budget_estime_dh.toLocaleString('fr-FR') + ' DH</span>';
+        html += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:16px;">' +
+            '<strong style="font-size:15px;">Terrain</strong>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;font-size:14px;">';
+        if (t.surface_m2) html += '<span style="background:#e0f2fe;padding:5px 14px;border-radius:14px;">' + t.surface_m2 + ' m²</span>';
+        if (t.localisation) html += '<span style="background:#e0f2fe;padding:5px 14px;border-radius:14px;">' + escapeHtml(t.localisation) + '</span>';
+        if (t.usage_souhaite) html += '<span style="background:#e0f2fe;padding:5px 14px;border-radius:14px;">' + escapeHtml(t.usage_souhaite) + '</span>';
+        if (t.budget_estime_dh) html += '<span style="background:#e0f2fe;padding:5px 14px;border-radius:14px;">Budget: ' + t.budget_estime_dh.toLocaleString('fr-FR') + ' DH</span>';
         html += '</div></div>';
 
-        // Plans classés
+        // Plans classes en grille (cote a cote)
         var plans = data.plans || [];
         if (plans.length === 0) {
-            html += '<p style="color:#6b7280;">Aucun plan généré. Essayez une description différente.</p>';
-        }
-        plans.forEach(function(p, i){
-            var rankColors = ['#fbbf24','#9ca3af','#d97706','#6b7280','#6b7280'];
-            var rankColor = rankColors[i] || '#6b7280';
-            var isRec = p.mcdm_recommended ? '<span style="background:#059669;color:#fff;padding:2px 8px;border-radius:8px;font-size:10px;margin-left:6px;">RECOMMANDÉ</span>' : '';
+            html += '<p style="color:#6b7280;font-size:14px;">Aucun plan genere. Essayez une description differente.</p>';
+        } else {
+            html += '<div style="display:flex;flex-wrap:wrap;gap:14px;">';
+            plans.forEach(function(p, i){
+                var rankColors = ['#fbbf24','#9ca3af','#d97706','#6b7280','#6b7280'];
+                var rankColor = rankColors[i] || '#6b7280';
+                var isRec = p.mcdm_recommended;
+                var borderColor = isRec ? '#059669' : '#e5e7eb';
 
-            html += '<div style="background:#fff;border:2px solid ' + (isRec ? '#059669' : '#e5e7eb') + ';border-radius:10px;padding:12px;margin-bottom:10px;">' +
-                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
-                '<div><strong style="font-size:14px;">#' + p.rank + ' ' + escapeHtml(p.name) + '</strong>' + isRec + '</div>' +
-                '<div style="background:' + rankColor + ';color:#fff;font-weight:bold;font-size:14px;padding:2px 10px;border-radius:12px;">' + (p.mcdm_score * 100).toFixed(0) + '%</div></div>' +
-                '<div style="font-size:12px;color:#6b7280;margin-bottom:8px;">' + escapeHtml(p.description || '') + '</div>';
+                html += '<div style="flex:1 1 calc(50% - 7px);min-width:280px;background:#fff;border:2px solid ' + borderColor + ';border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">';
 
-            // Détails techniques
-            html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-size:11px;">';
-            if (p.type) html += '<span style="background:#f3f4f6;padding:2px 8px;border-radius:8px;">' + escapeHtml(p.type) + '</span>';
-            if (p.nb_etages) html += '<span style="background:#f3f4f6;padding:2px 8px;border-radius:8px;">' + p.nb_etages + ' étages</span>';
-            if (p.surface_utile_m2) html += '<span style="background:#f3f4f6;padding:2px 8px;border-radius:8px;">' + p.surface_utile_m2 + ' m² utiles</span>';
-            if (p.cout_estime_dh) html += '<span style="background:#f3f4f6;padding:2px 8px;border-radius:8px;">' + Number(p.cout_estime_dh).toLocaleString('fr-FR') + ' DH</span>';
-            if (p.delai_mois) html += '<span style="background:#f3f4f6;padding:2px 8px;border-radius:8px;">' + p.delai_mois + ' mois</span>';
-            html += '</div>';
+                // Header: rank + badge + MCDM score (large)
+                html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
+                    '<div><span style="font-weight:700;font-size:16px;">#' + p.rank + ' ' + escapeHtml(p.name) + '</span>' +
+                    (isRec ? '<span style="background:#059669;color:#fff;padding:3px 10px;border-radius:8px;font-size:11px;margin-left:8px;font-weight:600;">RECOMMANDE</span>' : '') +
+                    '</div>' +
+                    '<div style="background:' + rankColor + ';color:#fff;font-weight:800;font-size:22px;padding:4px 14px;border-radius:14px;line-height:1.2;text-align:center;">' + (p.mcdm_score * 100).toFixed(0) + '%</div></div>';
 
-            // Scores MCDM
-            var cv = p.criteria_values || {};
-            html += '<div style="font-size:11px;color:#374151;background:#f9fafb;padding:8px;border-radius:6px;margin-bottom:6px;">';
-            html += '<strong>Scores MCDM :</strong> ';
-            Object.keys(cv).forEach(function(k){
-                var labels = {
-                    surface_utilisable: 'Surface','cout_estime': 'Coût','conformite_reglementaire': 'Conformité',
-                    faisabilite_technique: 'Faisabilité','delai_realisation': 'Délai','ml_viability_score': 'ML Viability'
+                // Description
+                html += '<div style="font-size:14px;color:#4b5563;margin-bottom:10px;line-height:1.4;">' + escapeHtml(p.description || '') + '</div>';
+
+                // Details techniques (bigger)
+                html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;font-size:13px;">';
+                if (p.type) html += '<span style="background:#f3f4f6;padding:4px 12px;border-radius:10px;">' + escapeHtml(p.type) + '</span>';
+                if (p.nb_etages) html += '<span style="background:#f3f4f6;padding:4px 12px;border-radius:10px;">' + p.nb_etages + ' etages</span>';
+                if (p.surface_utile_m2) html += '<span style="background:#f3f4f6;padding:4px 12px;border-radius:10px;">' + p.surface_utile_m2 + ' m² utiles</span>';
+                if (p.cout_estime_dh) html += '<span style="background:#f3f4f6;padding:4px 12px;border-radius:10px;">' + Number(p.cout_estime_dh).toLocaleString('fr-FR') + ' DH</span>';
+                if (p.delai_mois) html += '<span style="background:#f3f4f6;padding:4px 12px;border-radius:10px;">' + p.delai_mois + ' mois</span>';
+                html += '</div>';
+
+                // MCDM weight bars (distinct)
+                var cv = p.criteria_values || {};
+                var wm = data.mcdm && data.mcdm.weights_used ? data.mcdm.weights_used : {
+                    surface_utilisable: 0.20, cout_estime: 0.25, conformite_reglementaire: 0.25,
+                    faisabilite_technique: 0.15, delai_realisation: 0.10, ml_viability_score: 0.05
                 };
-                html += '<span style="margin-right:10px;">' + (labels[k] || k) + ': ' + cv[k] + '</span>';
+                var labels = {
+                    surface_utilisable: 'Surface', cout_estime: 'Cout', conformite_reglementaire: 'Conformite',
+                    faisabilite_technique: 'Faisabilite', delai_realisation: 'Delai', ml_viability_score: 'ML'
+                };
+                html += '<div style="margin-bottom:10px;">';
+                html += '<div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;">Poids MCDM</div>';
+                Object.keys(cv).forEach(function(k){
+                    var w = wm[k] || 0;
+                    var v = cv[k];
+                    var maxVal = k === 'cout_estime' ? 10000000 : (k === 'delai_realisation' ? 60 : (k === 'surface_utilisable' ? 1000 : 10));
+                    var pct = Math.min(100, Math.round((v / maxVal) * 100));
+                    var barColor = k === 'conformite_reglementaire' ? '#059669' : (k === 'cout_estime' ? '#ef4444' : (k === 'delai_realisation' ? '#f59e0b' : '#3b82f6'));
+                    html +=
+                        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">' +
+                            '<span style="font-size:12px;color:#6b7280;width:85px;flex-shrink:0;">' + (labels[k] || k) + '</span>' +
+                            '<div style="flex:1;height:10px;background:#e5e7eb;border-radius:5px;overflow:hidden;">' +
+                                '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:5px;transition:width 0.3s;"></div>' +
+                            '</div>' +
+                            '<span style="font-size:12px;font-weight:600;color:#374151;width:50px;text-align:right;">' + v + '</span>' +
+                            '<span style="font-size:11px;color:#9ca3af;width:30px;text-align:right;">' + (w*100).toFixed(0) + '%</span>' +
+                        '</div>';
+                });
+                html += '</div>';
+
+                // ML Predictions
+                var ml = p.ml_predictions || {};
+                var preds = ml.predictions || {};
+                var predKeys = Object.keys(preds);
+                if (predKeys.length > 0) {
+                    html += '<details style="font-size:12px;margin-bottom:6px;"><summary style="cursor:pointer;color:#6366f1;font-weight:500;">Predictions IA (' + predKeys.length + ')</summary>';
+                    predKeys.forEach(function(task){
+                        var r = preds[task];
+                        if (r && r.label) {
+                            html += '<div style="display:flex;justify-content:space-between;padding:3px 10px;background:#eef2ff;margin:3px 0;border-radius:4px;font-size:12px;">' +
+                                '<span>' + task + '</span><span><strong>' + r.label + '</strong> (' + r.confidence + '%)</span></div>';
+                        }
+                    });
+                    html += '</details>';
+                }
+
+                // Conformite (structuree)
+                var conf = p.conformite || {};
+                if (conf.risk_level) {
+                    var riskColors = { Faible: ['#bbf7d0','#059669'], Moyen: ['#fde68a','#d97706'], Eleve: ['#fecaca','#ef4444'], inconnu: ['#e5e7eb','#6b7280'] };
+                    var rc = riskColors[conf.risk_level] || riskColors['inconnu'];
+                    html += '<div style="border:1px solid ' + rc[0] + ';border-radius:8px;padding:10px;margin-top:6px;background:#fafafa;">';
+                    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+                        '<span style="font-weight:600;font-size:13px;color:#374151;">Conformite</span>' +
+                        '<span style="background:' + rc[0] + ';color:' + rc[1] + ';font-weight:700;font-size:12px;padding:3px 12px;border-radius:10px;">' + escapeHtml(conf.risk_level) + '</span></div>';
+                    if (conf.classification) {
+                        html += '<div style="font-size:13px;color:#374151;margin-bottom:4px;"><strong>Classification :</strong> ' + escapeHtml(conf.classification) + '</div>';
+                    }
+                    if (conf.key_points && conf.key_points.length > 0) {
+                        html += '<ul style="margin:4px 0 0 0;padding-left:16px;font-size:12px;color:#6b7280;line-height:1.5;">';
+                        conf.key_points.forEach(function(kp){
+                            html += '<li>' + escapeHtml(kp) + '</li>';
+                        });
+                        html += '</ul>';
+                    }
+                    if (conf.details) {
+                        html += '<div style="font-size:12px;color:#9ca3af;margin-top:4px;">' + escapeHtml(conf.details) + '</div>';
+                    }
+                    html += '</div>';
+                }
+
+                html += '</div>';
             });
             html += '</div>';
 
-            // ML Predictions
-            var ml = p.ml_predictions || {};
-            var preds = ml.predictions || {};
-            var predKeys = Object.keys(preds);
-            if (predKeys.length > 0) {
-                html += '<details style="font-size:11px;margin-bottom:6px;"><summary style="cursor:pointer;color:#6366f1;">🤖 Prédictions IA (' + predKeys.length + ')</summary>';
-                predKeys.forEach(function(task){
-                    var r = preds[task];
-                    if (r && r.label) {
-                        html += '<div style="display:flex;justify-content:space-between;padding:2px 8px;background:#eef2ff;margin:2px 0;border-radius:4px;">' +
-                            '<span>' + task + '</span><span><strong>' + r.label + '</strong> (' + r.confidence + '%)</span></div>';
-                    }
-                });
-                html += '</details>';
-            }
-
-            // Conformité
-            var conf = p.conformite || {};
-            if (conf.verdict) {
-                var isSafe = conf.verdict.indexOf('✅') >= 0 || conf.verdict.indexOf('Faible') >= 0;
-                var isWarn = conf.verdict.indexOf('⚠️') >= 0 || conf.verdict.indexOf('Moyen') >= 0;
-                var borderColor = isSafe ? '#bbf7d0' : (isWarn ? '#fde68a' : '#fecaca');
-                html += '<details style="font-size:11px;"><summary style="cursor:pointer;color:' + (isSafe ? '#059669' : (isWarn ? '#d97706' : '#ef4444')) + ';">🔒 Conformité réglementaire</summary>' +
-                    '<div style="background:#fefefe;border:1px solid ' + borderColor + ';border-radius:6px;padding:8px;margin-top:4px;">' +
-                    renderMarkdown(conf.verdict) + '</div></details>';
-            }
-
-            html += '</div>';
-        });
-
-        // Résumé MCDM
-        var mcdm = data.mcdm || {};
-        html += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px;margin-top:4px;font-size:11px;color:#374151;">' +
-            '<strong>Méthode :</strong> ' + (mcdm.method || 'WSM').toUpperCase() +
-            ' &nbsp;|&nbsp; <strong>Poids :</strong> ' + (mcdm.weights_used ? Object.values(mcdm.weights_used).map(function(w){ return (w*100).toFixed(0)+'%'; }).join(' / ') : '') +
-            '</div>';
+            // Resume MCDM
+            var mcdm = data.mcdm || {};
+            html += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-top:14px;font-size:13px;color:#374151;">' +
+                '<strong>Methode :</strong> ' + (mcdm.method || 'WSM').toUpperCase() +
+                ' &nbsp;|&nbsp; <strong>Poids :</strong> ' + (mcdm.weights_used ? Object.values(mcdm.weights_used).map(function(w){ return (w*100).toFixed(0)+'%'; }).join(' / ') : '') +
+                '</div>';
+        }
 
         document.getElementById('taxoRecomResult').innerHTML = html;
         document.getElementById('taxoRecomResult').style.display = 'block';
+        // Scroll result into view
+        document.getElementById('taxoRecomResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }).catch(function(){
         document.getElementById('taxoRecomLoader').style.display = 'none';
         document.getElementById('btnRecomRun').disabled = false;
@@ -1467,43 +1438,6 @@ function recommendTaxonomie() {
     });
 }
 
-/* ============================================================
-   Taxonomie Bâtiment - Arbre
-   ============================================================ */
-function loadTaxonomyTree() {
-    document.getElementById('btnTreeLoad').disabled = true;
-    document.getElementById('btnTreeLoad').textContent = 'Chargement...';
-    document.getElementById('taxoTree').style.display = 'block';
-    document.getElementById('taxoTree').innerHTML = '<div style="text-align:center;color:#6b7280;padding:10px;">Chargement...</div>';
-    fetch('/api/taxonomie/tree').then(function(r){ return r.json(); }).then(function(data){
-        document.getElementById('btnTreeLoad').disabled = false;
-        document.getElementById('btnTreeLoad').textContent = 'Charger l\'arbre complet';
-        if (data.error) {
-            document.getElementById('taxoTree').innerHTML = '<p style="color:#ef4444;">' + escapeHtml(data.error) + '</p>';
-            return;
-        }
-        var html = '<div style="font-size:11px;color:#6b7280;margin-bottom:8px;">' + data.count_entries + ' entrées réglementaires</div>';
-        (data.domaines || []).forEach(function(dom){
-            html += '<div style="margin-bottom:10px;">' +
-                '<div style="font-weight:600;font-size:13px;color:#1d4ed8;margin-bottom:4px;">📁 ' + escapeHtml(dom.nom) + '</div>';
-            (dom.sous_domaines || []).forEach(function(sd){
-                html += '<div style="margin-left:16px;margin-bottom:6px;">' +
-                    '<div style="font-weight:500;font-size:12px;color:#374151;">▸ ' + escapeHtml(sd.nom) + ' <span style="color:#9ca3af;">(' + sd.entrees.length + ')</span></div>';
-                (sd.entrees || []).forEach(function(e){
-                    html += '<div style="margin-left:20px;font-size:11px;color:#6b7280;padding:2px 0;">' +
-                        '• <strong>' + escapeHtml(e.categorie) + '</strong> — ' + escapeHtml(e.caracteristiques) + '</div>';
-                });
-                html += '</div>';
-            });
-            html += '</div>';
-        });
-        document.getElementById('taxoTree').innerHTML = html;
-    }).catch(function(){
-        document.getElementById('btnTreeLoad').disabled = false;
-        document.getElementById('btnTreeLoad').textContent = 'Charger l\'arbre complet';
-        document.getElementById('taxoTree').innerHTML = '<p style="color:#ef4444;">Erreur lors du chargement.</p>';
-    });
-}
 </script>
 
 </body>

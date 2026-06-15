@@ -266,35 +266,6 @@ def rag_sources():
         for c in chunks
     ])
 
-# ============================================================
-# Routes Taxonomie Bâtiment
-# ============================================================
-
-@app.route("/api/taxonomie/classify", methods=["POST"])
-def taxonomie_classify():
-    """Classifie un bâtiment à partir d'une description."""
-    from rag_conformite import classify_building as _classify
-    data = request.json or {}
-    query = data.get("query", "").strip()
-    if not query:
-        return jsonify({"error": "Description du bâtiment requise"}), 400
-    try:
-        result = _classify(query, top_k=data.get("top_k", 5))
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/api/taxonomie/tree", methods=["GET"])
-def taxonomie_tree():
-    """Retourne l'arbre complet de la taxonomie bâtiment."""
-    from rag_conformite import get_taxonomy_tree
-    try:
-        return jsonify(get_taxonomy_tree())
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
 @app.route("/api/taxonomie/recommend", methods=["POST"])
 def taxonomie_recommend():
     """Pipeline complet : RAG → ML → MCDM → Conformité pour un terrain."""
