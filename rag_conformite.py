@@ -405,6 +405,92 @@ def rag_query(query: str, zone: str = None, lang: str = "fr") -> dict:
 
 
 # ============================================================
+# Classification Taxonomie Bâtiment
+# ============================================================
+
+def classify_building(query: str, top_k: int = 5) -> dict:
+    """
+    Classifie un bâtiment à partir d'une description textuelle.
+    Utilise la similarité TF-IDF contre la base Taxonomie Bâtiment.
+    
+    Returns:
+        dict avec { "query", "classifications": [...], "tree_link" }
+    """
+    rag = get_rag()
+    chunks = rag.retrieve(query, top_k=top_k, zone_filter="Réglementation Bâtiment")
+    
+    results = []
+    for c in chunks:
+        doc = c["doc"]
+        parts = doc["text"].split(" — ")
+        results.append({
+            "id": doc["id"],
+            "source": doc["source"],
+            "score": c["score"],
+            "sous_domaine": parts[0] if len(parts) > 0 else "",
+            "categorie": parts[1] if len(parts) > 1 else "",
+            "caracteristiques": parts[2] if len(parts) > 2 else "",
+            "full_text": doc["text"]
+        })
+    
+    return {
+        "query": query,
+        "classifications": results,
+        "count": len(results)
+    }
+
+
+def get_taxonomy_tree() -> dict:
+    """
+    Retourne la taxonomie sous forme d'arbre structuré :
+    Domaine → Sous-domaine → [{ Catégorie, Caractéristiques }].
+    """
+    tree = {}
+    for doc in KNOWLEDGE_BASE:
+        if not doc["id"].startswith("taxo_"):
+            continue
+        parts = doc["text"].split(" — ")
+        domaine = doc["source"].replace("Taxonomie Bâtiment V1 — ", "")
+        
+        if domaine not in tree:
+            tree[domaine] = {}
+        
+        sous_domaine = parts[0] if len(parts) > 0 else ""
+        categorie = parts[1] if len(parts) > 1 else ""
+        caracteristiques = parts[2] if len(parts) > 2 else ""
+        
+        if sous_domaine not in tree[domaine]:
+            tree[domaine][sous_domaine] = []
+        
+        tree[domaine][sous_domaine].append({
+            "categorie": categorie,
+            "caracteristiques": caracteristiques,
+            "id": doc["id"]
+        })
+    
+    return {
+        "domaines": [
+            {
+                "nom": domaine,
+                "sous_domaines": [
+                    {
+                        "nom": sd,
+                        "entrees": entries
+                    }
+                    for sd, entries in sous_domaines.items()
+                ]
+            }
+            for domaine, sous_domaines in tree.items()
+        ],
+        "count_entries": sum(
+            len(entries)
+            for sd_dict in tree.values()
+            for entries in sd_dict.values()
+        )
+    }
+
+
+# ============================================================
 # Test rapide
 # ============================================================
 

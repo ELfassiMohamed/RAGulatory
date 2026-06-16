@@ -266,6 +266,22 @@ def rag_sources():
         for c in chunks
     ])
 
+@app.route("/api/taxonomie/recommend", methods=["POST"])
+def taxonomie_recommend():
+    """Pipeline complet : RAG → ML → MCDM → Conformité pour un terrain."""
+    from taxonomie_advisor import recommend as _recommend
+    data = request.json or {}
+    query = data.get("query", "").strip()
+    if not query:
+        return jsonify({"error": "Description du terrain requise"}), 400
+    try:
+        import httpx, json
+        result = _recommend(query, method=data.get("method", "wsm"))
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/procurement/compare", methods=["POST"])
 def procurement_compare():
     data = request.json or {}
