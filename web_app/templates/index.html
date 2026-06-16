@@ -76,12 +76,11 @@
 
             <!-- Boutons mode Cr&eacute;ateur -->
             <div style="display:flex;gap:8px;align-items:center;" id="headerBtnsCreateur">
-                <button class="btn-taxo" onclick="document.getElementById('taxoModal').style.display='flex'" title="Taxonomie Bâtiment">
+                <button class="btn-taxo" onclick="document.getElementById('taxoModal').style.display='flex'" title="Verification Reglementaire" style="background-color: #22c55e; color: white; border-color: #22c55e;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-                        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+                        <path d="M20 6L9 17l-5-5"/>
                     </svg>
-                    Taxonomie
+                    Vérification Réglementaire
                 </button>
                 <button class="btn-predict-hdr" onclick="openPredictPanel()" title="Pr&eacute;dictions IA">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -152,12 +151,12 @@
                     </svg>
                     Architecture IA
                 </button>
-                <button class="btn-taxo" onclick="document.getElementById('taxoModal').style.display='flex'" title="Taxonomie Bâtiment">
+                <button class="btn-taxo" onclick="document.getElementById('taxoModal').style.display='flex'" title="Verification Reglementaire">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
                         <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
                     </svg>
-                    Taxonomie
+                    Verification Reglementaire
                 </button>
                 <button class="btn-clear" id="btnClearAcheteur" title="Vider la conversation" style="display:none;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -398,15 +397,15 @@
 <div class="modal-overlay" id="taxoModal" style="display:none;">
     <div class="modal" style="width:800px;max-width:95vw;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <h3 style="margin:0;">Taxonomie Batiment</h3>
+            <h3 style="margin:0;">Verification Reglementaire</h3>
             <button class="btn-cancel" style="padding:4px 12px;" onclick="document.getElementById('taxoModal').style.display='none'">&times;</button>
         </div>
 
         <!-- Recommandation terrain -->
         <div style="margin-bottom:16px;">
             <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Analyse Terrain > Plans > Conformite</div>
-            <div style="display:flex;gap:8px;">
-                <input type="text" id="taxoRecomQuery" placeholder="Décrivez le terrain : surface, localisation, budget..." style="flex:1;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+            <div style="display:flex;gap:8px;flex-direction:column;">
+                <textarea id="taxoRecomQuery" rows="3" placeholder="Décrivez le terrain : surface, localisation, budget..." style="flex:1;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit;"></textarea>
                 <button class="btn-confirm" style="background:#2563eb;" onclick="recommendTaxonomie()" id="btnRecomRun">Analyser</button>
             </div>
         </div>
