@@ -1,49 +1,291 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html class="light" lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verification Reglementaire</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>RAGulatory - Vérification Réglementaire</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet">
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-primary": "#ffffff",
+                "secondary-container": "#82f5c1",
+                "on-tertiary-fixed": "#2f1500",
+                "on-primary-fixed": "#00174b",
+                "inverse-on-surface": "#eff1f3",
+                "inverse-primary": "#b4c5ff",
+                "surface-dim": "#d8dadc",
+                "primary": "#004ac6",
+                "on-primary-container": "#eeefff",
+                "on-secondary-fixed-variant": "#005137",
+                "on-tertiary": "#ffffff",
+                "on-tertiary-fixed-variant": "#6e3900",
+                "on-error": "#ffffff",
+                "inverse-surface": "#2d3133",
+                "outline-variant": "#c3c6d7",
+                "surface-container-lowest": "#ffffff",
+                "background": "#f7f9fb",
+                "surface-container": "#eceef0",
+                "on-primary-fixed-variant": "#003ea8",
+                "on-secondary-container": "#00714e",
+                "surface-container-low": "#f2f4f6",
+                "surface": "#f7f9fb",
+                "secondary-fixed-dim": "#68dba9",
+                "on-surface": "#191c1e",
+                "on-surface-variant": "#434655",
+                "tertiary": "#824500",
+                "on-error-container": "#93000a",
+                "secondary": "#006c4a",
+                "primary-container": "#2563eb",
+                "tertiary-container": "#a65900",
+                "on-background": "#191c1e",
+                "primary-fixed": "#dbe1ff",
+                "surface-tint": "#0053db",
+                "on-secondary-fixed": "#002114",
+                "tertiary-fixed-dim": "#ffb77d",
+                "surface-container-high": "#e6e8ea",
+                "surface-variant": "#e0e3e5",
+                "error": "#ba1a1a",
+                "on-tertiary-container": "#ffede1",
+                "secondary-fixed": "#85f8c4",
+                "primary-fixed-dim": "#b4c5ff",
+                "tertiary-fixed": "#ffdcc3",
+                "surface-container-highest": "#e0e3e5",
+                "error-container": "#ffdad6",
+                "surface-bright": "#f7f9fb",
+                "on-secondary": "#ffffff",
+                "outline": "#737686"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "lg": "40px",
+                "margin": "32px",
+                "xs": "8px",
+                "sm": "16px",
+                "md": "24px",
+                "base": "4px",
+                "xl": "64px",
+                "gutter": "24px"
+            },
+            "fontFamily": {
+                "headline-sm": ["Inter"],
+                "label-md": ["Inter"],
+                "body-md": ["Inter"],
+                "body-sm": ["Inter"],
+                "headline-lg": ["Inter"],
+                "headline-md": ["Inter"],
+                "code-sm": ["JetBrains Mono"],
+                "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                "headline-lg": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                "code-sm": ["13px", { "lineHeight": "20px", "fontWeight": "400" }],
+                "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .card-shadow {
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.04);
+        }
+        .dark .card-shadow {
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+        }
+    </style>
+    <script>
+        // Inline script to prevent theme flashing
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const html = document.documentElement;
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                html.classList.add('dark');
+                html.classList.remove('light');
+            } else {
+                html.classList.add('light');
+                html.classList.remove('dark');
+            }
+        })();
+    </script>
 </head>
-<body>
-
-<div style="padding:20px;max-width:900px;margin:0 auto;">
-
-    <!-- Header -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <h2 style="margin:0;">Verification Reglementaire</h2>
-        <button class="btn-confirm" onclick="document.getElementById('taxoModal').style.display='flex'">
-            Nouvelle analyse
-        </button>
+<body class="text-on-background bg-background dark:bg-inverse-surface/5 h-screen flex flex-col overflow-hidden transition-colors duration-200">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm flex justify-between items-center w-full px-margin py-4 z-50 transition-colors duration-200">
+    <div class="flex items-center gap-md">
+        <span class="font-headline-md text-headline-md font-bold text-primary dark:text-inverse-primary">RAGulatory</span>
+        <nav class="hidden md:flex space-x-md ml-lg">
+            <a class="text-primary dark:text-inverse-primary font-bold border-b-2 border-primary pb-2 font-label-md text-label-md" href="#">Dashboard</a>
+            <a class="text-on-surface-variant dark:text-surface-variant pb-2 hover:text-primary dark:hover:text-inverse-primary transition-colors font-label-md text-label-md" href="#">Projects</a>
+            <a class="text-on-surface-variant dark:text-surface-variant pb-2 hover:text-primary dark:hover:text-inverse-primary transition-colors font-label-md text-label-md" href="#">Analysis</a>
+            <a class="text-on-surface-variant dark:text-surface-variant pb-2 hover:text-primary dark:hover:text-inverse-primary transition-colors font-label-md text-label-md" href="#">Sources</a>
+        </nav>
     </div>
-
-    <!-- Taxonomie Modal -->
-    <div class="modal-overlay" id="taxoModal" style="display:none;">
-        <div class="modal" style="width:800px;max-width:95vw;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <h3 style="margin:0;">Analyse Terrain > Plans > Conformite</h3>
-                <button class="btn-cancel" style="padding:4px 12px;" onclick="document.getElementById('taxoModal').style.display='none'">&times;</button>
-            </div>
-
-            <div style="margin-bottom:16px;">
-                <div style="display:flex;gap:8px;flex-direction:column;">
-                    <textarea id="taxoRecomQuery" rows="3" placeholder="Decrivez le terrain : surface, localisation, budget..." style="flex:1;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit;"></textarea>
-                    <button class="btn-confirm" style="background:#2563eb;" onclick="recommendTaxonomie()" id="btnRecomRun">Analyser</button>
-                </div>
-            </div>
-            <div id="taxoRecomLoader" style="display:none;text-align:center;padding:20px;color:#6b7280;">
-                <div class="typing-bubble"><span></span><span></span><span></span></div>
-                <div style="margin-top:8px;font-size:13px;">Analyse en cours (RAG + ML + MCDM)...</div>
-            </div>
-            <div id="taxoRecomResult" style="display:none;max-height:480px;overflow-y:auto;padding-right:4px;"></div>
-
-            <div class="modal-actions" style="margin-top:16px;">
-                <button class="btn-cancel" onclick="document.getElementById('taxoModal').style.display='none'">Fermer</button>
-            </div>
+    <div class="flex items-center space-x-md">
+        <button class="bg-primary text-on-primary px-sm py-xs rounded-lg font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all" onclick="resetAll()">New Analysis</button>
+        <div class="flex space-x-xs text-on-surface-variant dark:text-surface-variant items-center">
+            <span class="material-symbols-outlined cursor-pointer hover:bg-surface-variant dark:hover:bg-inverse-surface/40 p-base rounded-full select-none" id="themeToggleBtn" onclick="toggleTheme()">dark_mode</span>
+            <span class="material-symbols-outlined cursor-pointer hover:bg-surface-variant dark:hover:bg-inverse-surface/40 p-base rounded-full">notifications</span>
+            <span class="material-symbols-outlined cursor-pointer hover:bg-surface-variant dark:hover:bg-inverse-surface/40 p-base rounded-full">settings</span>
+        </div>
+        <div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+            <img class="w-full h-full object-cover" alt="User Profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHwiLCok0wzrCDcAV3F4OfH1TXX2sGUB9qau0j287Uta9aKd21RQRsibHCueVEzCijb9M9WhshJrlxs4-cRfqMGIRdtO8EFCYDihe1dvpQe8Bt0ShvRnyS-nYLnlqpCwYxLh6vGiev2jcAcAvpkYb8u4kWm5_lAcNvp9Aevmh1U1qDdJty5vkqSVlJUyogu0V3EXbG8iHdk5AjC50BEklUDIE9j_D---FF5or-W0XLUC3H-Mc2GPYN1TV-RmbvHw2Bs2MXiIB0Ido">
         </div>
     </div>
+</header>
 
+<div class="flex flex-1 overflow-hidden">
+    <!-- SideNavBar -->
+    <aside class="bg-surface-container dark:bg-surface-container-high flex flex-col h-full p-sm space-y-base w-64 hidden md:flex border-r border-outline-variant/30 transition-colors duration-200">
+        <div class="px-xs py-sm mb-sm border-b border-outline-variant/30">
+            <div class="flex items-center gap-xs">
+                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-on-primary">
+                    <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">architecture</span>
+                </div>
+                <div>
+                    <p class="font-label-md text-label-md font-bold text-on-surface dark:text-white">Project Alpha</p>
+                    <p class="text-[10px] text-on-surface-variant dark:text-surface-variant/80">R+2 Residential</p>
+                </div>
+            </div>
+        </div>
+        <nav class="space-y-base flex-1">
+            <a class="flex items-center gap-sm px-sm py-xs bg-primary-container dark:bg-on-primary-fixed-variant text-on-primary-container dark:text-primary-fixed rounded-lg font-bold translate-x-1 transition-transform font-label-md text-label-md" href="#" onclick="resetAll()">
+                <span class="material-symbols-outlined">home</span> Home
+            </a>
+            <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-inverse-surface rounded-lg transition-colors font-label-md text-label-md" href="#">
+                <span class="material-symbols-outlined">description</span> Documents
+            </a>
+            <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-inverse-surface rounded-lg transition-colors font-label-md text-label-md" href="#">
+                <span class="material-symbols-outlined">calculate</span> Calculations
+            </a>
+            <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-inverse-surface rounded-lg transition-colors font-label-md text-label-md" href="#">
+                <span class="material-symbols-outlined">gavel</span> Compliance
+            </a>
+            <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant dark:text-surface-variant hover:bg-surface-variant dark:hover:bg-inverse-surface rounded-lg transition-colors font-label-md text-label-md" href="#">
+                <span class="material-symbols-outlined">inventory_2</span> Archive
+            </a>
+        </nav>
+        <div class="pt-sm border-t border-outline-variant/30 space-y-base">
+            <button class="w-full bg-primary text-on-primary py-xs rounded-lg font-label-md text-label-md mb-md hover:opacity-90 active:scale-95 transition-all" onclick="recommend()">Generate Plan</button>
+            <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant dark:text-surface-variant font-label-md text-label-md" href="#">
+                <span class="material-symbols-outlined">help</span> Support
+            </a>
+            <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant dark:text-surface-variant font-label-md text-label-md" href="#">
+                <span class="material-symbols-outlined">account_circle</span> Account
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-md space-y-md custom-scrollbar bg-background dark:bg-inverse-surface/5 text-on-background dark:text-white transition-colors duration-200">
+        <!-- Prompt Input Section -->
+        <section class="max-w-6xl mx-auto">
+            <div class="bg-surface-container-lowest dark:bg-inverse-surface/30 p-md rounded-xl card-shadow border border-outline-variant/50">
+                <div class="flex items-center gap-xs mb-sm">
+                    <span class="material-symbols-outlined text-primary dark:text-inverse-primary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                    <h2 class="font-headline-sm text-headline-sm text-on-surface dark:text-white">AI Design Assistant</h2>
+                </div>
+                <div class="relative group">
+                    <textarea id="queryInput" class="w-full h-32 p-md rounded-lg border border-outline-variant bg-surface-bright dark:bg-inverse-surface/20 dark:text-white dark:border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-md text-body-md resize-none" placeholder="Décrivez le terrain : surface, localisation, budget, nombre d'étages..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();recommend()}"></textarea>
+                    <div class="absolute bottom-sm right-sm flex gap-xs">
+                        <button id="btnRun" onclick="recommend()" class="bg-primary text-on-primary px-md py-xs rounded-lg font-label-md text-label-md shadow-lg hover:shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center gap-xs">
+                            <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+                            Generate Plans
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Content Section -->
+        <section class="max-w-6xl mx-auto space-y-md pb-xl">
+            <!-- Empty State (shown initially) -->
+            <div class="flex flex-col items-center justify-center py-20 text-center p-lg gap-sm text-on-surface-variant dark:text-surface-variant max-w-md mx-auto" id="emptyState">
+                <div class="w-16 h-16 bg-primary-fixed dark:bg-on-primary-fixed-variant rounded-xl flex items-center justify-center text-primary dark:text-primary-fixed mb-sm">
+                    <span class="material-symbols-outlined text-[32px]">architecture</span>
+                </div>
+                <h2 class="font-headline-sm text-headline-sm text-on-surface dark:text-white">Analyse réglementaire de terrain</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant dark:text-surface-variant/80 leading-relaxed">Décrivez votre terrain (surface, localisation, budget, étages) pour obtenir des plans de construction conformes à la réglementation marocaine.</p>
+            </div>
+
+            <!-- Loader (hidden by default) -->
+            <div class="flex flex-col items-center justify-center py-20 gap-sm text-on-surface-variant dark:text-surface-variant" id="loader" style="display:none;">
+                <div class="flex gap-xs">
+                    <span class="w-3 h-3 bg-primary dark:bg-inverse-primary rounded-full animate-bounce" style="animation-delay: 0s;"></span>
+                    <span class="w-3 h-3 bg-primary dark:bg-inverse-primary rounded-full animate-bounce" style="animation-delay: 0.15s;"></span>
+                    <span class="w-3 h-3 bg-primary dark:bg-inverse-primary rounded-full animate-bounce" style="animation-delay: 0.3s;"></span>
+                </div>
+                <div class="font-label-md text-label-md text-primary dark:text-inverse-primary animate-pulse mt-xs">Analyse en cours (RAG + ML + MCDM)...</div>
+            </div>
+
+            <!-- Results Container (hidden by default) -->
+            <div id="resultsContainer" style="display:none;" class="space-y-md"></div>
+        </section>
+    </main>
+
+    <!-- Source Rail (Context Rail) -->
+    <aside id="sourceRail" class="w-96 bg-surface-container-lowest dark:bg-inverse-surface/30 border-l border-outline-variant/50 flex flex-col h-full hidden lg:flex transition-colors duration-200">
+        <div class="source-rail-header flex items-center justify-between p-sm border-b border-outline-variant/30 flex-shrink-0">
+            <h3 class="font-headline-sm text-headline-sm text-on-surface dark:text-white">Sources</h3>
+            <span class="source-rail-count text-body-sm text-on-surface-variant dark:text-surface-variant" id="sourceCount"></span>
+        </div>
+        <div class="source-rail-content flex-1 overflow-y-auto p-sm space-y-sm custom-scrollbar" id="sourceContent">
+            <div class="source-rail-empty flex flex-col items-center justify-center text-center h-full p-lg gap-sm text-on-surface-variant/70 dark:text-surface-variant/70 font-body-sm" id="sourceEmpty">
+                <span class="material-symbols-outlined text-[32px] text-on-surface-variant/40 dark:text-surface-variant/40">description</span>
+                <p>Les sources réglementaires apparaîtront ici après l'analyse.</p>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<!-- Floating AI Bubble (Micro-interaction) -->
+<div class="fixed bottom-margin right-margin group z-50">
+    <div class="relative">
+        <div class="absolute -inset-1 bg-primary dark:bg-inverse-primary rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+        <button onclick="document.getElementById('queryInput').focus()" class="relative bg-primary text-on-primary dark:bg-inverse-primary dark:text-inverse-on-surface w-12 h-12 rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+            <span class="material-symbols-outlined">chat_bubble</span>
+        </button>
+    </div>
 </div>
 
 <script>
@@ -54,159 +296,301 @@ function escapeHtml(text) {
     return d.innerHTML;
 }
 
-function recommendTaxonomie() {
-    var query = document.getElementById('taxoRecomQuery').value.trim();
-    if (!query) { alert('Veuillez decrire le terrain.'); return; }
-    document.getElementById('taxoRecomLoader').style.display = 'block';
-    document.getElementById('taxoRecomResult').style.display = 'none';
-    document.getElementById('btnRecomRun').disabled = true;
+function toggleTheme() {
+    const html = document.documentElement;
+    const btn = document.getElementById('themeToggleBtn');
+    if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        btn.textContent = 'dark_mode';
+        localStorage.setItem('theme', 'light');
+    } else {
+        html.classList.add('dark');
+        html.classList.remove('light');
+        btn.textContent = 'light_mode';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+// Initialize theme state on toggle button
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) {
+        if (document.documentElement.classList.contains('dark')) {
+            btn.textContent = 'light_mode';
+        } else {
+            btn.textContent = 'dark_mode';
+        }
+    }
+});
+
+function recommend() {
+    var query = document.getElementById('queryInput').value.trim();
+    if (!query) return;
+
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('loader').style.display = 'flex';
+    document.getElementById('resultsContainer').style.display = 'none';
+    document.getElementById('btnRun').disabled = true;
+
     fetch('/api/taxonomie/recommend', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ query: query, method: 'wsm' })
-    }).then(function(r){ return r.json(); }).then(function(data){
-        document.getElementById('taxoRecomLoader').style.display = 'none';
-        document.getElementById('btnRecomRun').disabled = false;
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('btnRun').disabled = false;
+
         if (data.error) {
-            document.getElementById('taxoRecomResult').innerHTML = '<p style="color:#ef4444;">' + escapeHtml(data.error) + '</p>';
-            document.getElementById('taxoRecomResult').style.display = 'block';
+            document.getElementById('resultsContainer').innerHTML = '<div class="bg-error-container/10 border border-error/30 text-error p-sm rounded-lg font-body-sm">' + escapeHtml(data.error) + '</div>';
+            document.getElementById('resultsContainer').style.display = 'block';
             return;
         }
-        var html = '';
 
-        // Resume terrain
-        var t = data.terrain || {};
-        html += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:16px;">' +
-            '<strong style="font-size:15px;">Terrain</strong>' +
-            '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;font-size:14px;">';
-        if (t.surface_m2) html += '<span style="background:#e0f2fe;padding:5px 14px;border-radius:14px;">' + t.surface_m2 + ' m²</span>';
-        if (t.localisation) html += '<span style="background:#e0f2fe;padding:5px 14px;border-radius:14px;">' + escapeHtml(t.localisation) + '</span>';
-        if (t.usage_souhaite) html += '<span style="background:#e0f2fe;padding:5px 14px;border-radius:14px;">' + escapeHtml(t.usage_souhaite) + '</span>';
-        if (t.budget_estime_dh) html += '<span style="background:#e0f2fe;padding:5px 14px;border-radius:14px;">Budget: ' + t.budget_estime_dh.toLocaleString('fr-FR') + ' DH</span>';
-        html += '</div></div>';
+        renderResults(data);
+    })
+    .catch(function() {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('btnRun').disabled = false;
+        document.getElementById('resultsContainer').innerHTML = '<div class="bg-error-container/10 border border-error/30 text-error p-sm rounded-lg font-body-sm">Erreur lors de l\'analyse.</div>';
+        document.getElementById('resultsContainer').style.display = 'block';
+    });
+}
 
-        // Plans en grille
-        var plans = data.plans || [];
-        if (plans.length === 0) {
-            html += '<p style="color:#6b7280;font-size:14px;">Aucun plan genere.</p>';
-        } else {
-            html += '<div style="display:flex;flex-wrap:wrap;gap:14px;">';
-            plans.forEach(function(p, i){
-                var rankColors = ['#fbbf24','#9ca3af','#d97706','#6b7280','#6b7280'];
-                var rankColor = rankColors[i] || '#6b7280';
-                var isRec = p.mcdm_recommended;
-                var borderColor = isRec ? '#059669' : '#e5e7eb';
+function renderResults(data) {
+    var html = '';
+    var t = data.terrain || {};
 
-                html += '<div style="flex:1 1 calc(50% - 7px);min-width:280px;background:#fff;border:2px solid ' + borderColor + ';border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">';
+    // Terrain summary card
+    html += '<div class="bg-surface-container-lowest dark:bg-inverse-surface/30 border border-outline-variant/50 rounded-xl p-sm shadow-sm transition-colors mb-md">';
+    html += '  <div class="flex items-center justify-between mb-xs">';
+    html += '    <h3 class="font-headline-sm text-headline-sm text-on-surface dark:text-white">Terrain</h3>';
+    html += '    <span class="bg-primary/10 text-primary dark:bg-inverse-primary/10 dark:text-inverse-primary px-xs py-0.5 rounded font-label-md text-[10px]">' + ((data.mcdm && data.mcdm.method) || 'WSM').toUpperCase() + '</span>';
+    html += '  </div>';
+    html += '  <div class="flex flex-wrap gap-xs mt-xs">';
+    if (t.surface_m2) html += '    <span class="bg-surface-container dark:bg-inverse-surface/40 text-on-surface-variant dark:text-surface-variant px-sm py-1 rounded-full font-label-md text-label-md">' + t.surface_m2 + ' m²</span>';
+    if (t.localisation) html += '    <span class="bg-surface-container dark:bg-inverse-surface/40 text-on-surface-variant dark:text-surface-variant px-sm py-1 rounded-full font-label-md text-label-md">' + escapeHtml(t.localisation) + '</span>';
+    if (t.usage_souhaite) html += '    <span class="bg-surface-container dark:bg-inverse-surface/40 text-on-surface-variant dark:text-surface-variant px-sm py-1 rounded-full font-label-md text-label-md">' + escapeHtml(t.usage_souhaite) + '</span>';
+    if (t.budget_estime_dh) html += '    <span class="bg-surface-container dark:bg-inverse-surface/40 text-on-surface-variant dark:text-surface-variant px-sm py-1 rounded-full font-label-md text-label-md">Budget: ' + Number(t.budget_estime_dh).toLocaleString('fr-FR') + ' DH</span>';
+    html += '  </div>';
+    html += '</div>';
 
-                // Header: rang + nom + score MCDM
-                html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
-                    '<div><span style="font-weight:700;font-size:16px;">#' + p.rank + ' ' + escapeHtml(p.name) + '</span>' +
-                    (isRec ? '<span style="background:#059669;color:#fff;padding:3px 10px;border-radius:8px;font-size:11px;margin-left:8px;font-weight:600;">RECOMMANDE</span>' : '') +
-                    '</div>' +
-                    '<div style="background:' + rankColor + ';color:#fff;font-weight:800;font-size:22px;padding:4px 14px;border-radius:14px;line-height:1.2;text-align:center;">' + (p.mcdm_score * 100).toFixed(0) + '%</div></div>';
+    // Plans grid
+    var plans = data.plans || [];
+    if (plans.length === 0) {
+        html += '<p class="text-on-surface-variant dark:text-surface-variant font-body-sm">Aucun plan généré.</p>';
+    } else {
+        html += '<div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-md">';
+        plans.forEach(function(p, i) {
+            var isRec = p.mcdm_recommended;
+            
+            // Score badge color based on score value
+            var score = p.mcdm_score || 0;
+            var scoreColorClass = 'bg-[#e11d48]'; // Red
+            if (score >= 0.75) {
+                scoreColorClass = 'bg-[#059669]'; // Green
+            } else if (score >= 0.50) {
+                scoreColorClass = 'bg-[#d97706]'; // Amber
+            }
 
-                // Description
-                html += '<div style="font-size:14px;color:#4b5563;margin-bottom:10px;line-height:1.4;">' + escapeHtml(p.description || '') + '</div>';
+            var recBorderClass = isRec ? 'border-secondary/40 ring-1 ring-secondary/20' : 'border-outline-variant/50';
 
-                // Details techniques
-                html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;font-size:13px;">';
-                if (p.type) html += '<span style="background:#f3f4f6;padding:4px 12px;border-radius:10px;">' + escapeHtml(p.type) + '</span>';
-                if (p.nb_etages) html += '<span style="background:#f3f4f6;padding:4px 12px;border-radius:10px;">' + p.nb_etages + ' etages</span>';
-                if (p.surface_utile_m2) html += '<span style="background:#f3f4f6;padding:4px 12px;border-radius:10px;">' + p.surface_utile_m2 + ' m² utiles</span>';
-                if (p.cout_estime_dh) html += '<span style="background:#f3f4f6;padding:4px 12px;border-radius:10px;">' + Number(p.cout_estime_dh).toLocaleString('fr-FR') + ' DH</span>';
-                if (p.delai_mois) html += '<span style="background:#f3f4f6;padding:4px 12px;border-radius:10px;">' + p.delai_mois + ' mois</span>';
-                html += '</div>';
+            html += '<div class="bg-surface-container-lowest dark:bg-inverse-surface/30 rounded-xl border ' + recBorderClass + ' p-md card-shadow flex flex-col space-y-md hover:border-primary/30 transition-all duration-200">';
 
-                // Poids MCDM
-                var cv = p.criteria_values || {};
-                var wm = data.mcdm && data.mcdm.weights_used ? data.mcdm.weights_used : {};
-                var labels = {
-                    surface_utilisable: 'Surface', cout_estime: 'Cout', conformite_reglementaire: 'Conformite',
-                    faisabilite_technique: 'Faisabilite', delai_realisation: 'Delai', ml_viability_score: 'ML'
-                };
-                html += '<div style="margin-bottom:10px;">';
-                html += '<div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;">Poids MCDM</div>';
-                Object.keys(cv).forEach(function(k){
+            // Header
+            html += '  <div class="flex justify-between items-start">';
+            html += '    <div class="space-y-xs max-w-[70%]">';
+            html += '      <h4 class="font-headline-sm text-headline-sm text-on-surface dark:text-white flex items-center gap-xs">';
+            html += '        <span class="text-on-surface-variant/50 font-bold">#' + p.rank + '</span>';
+            html += '        <span class="truncate">' + escapeHtml(p.name) + '</span>';
+            html += '      </h4>';
+            html += '      <p class="font-body-sm text-body-sm text-on-surface-variant dark:text-surface-variant/80 line-clamp-2" title="' + escapeHtml(p.description || '') + '">' + escapeHtml(p.description || '') + '</p>';
+            html += '    </div>';
+            html += '    <div class="flex flex-col items-end gap-xs">';
+            html += '      <span class="' + scoreColorClass + ' text-on-primary font-bold text-[14px] px-sm py-1 rounded-full">' + (score * 100).toFixed(0) + '%</span>';
+            if (isRec) html += '      <span class="bg-secondary-container text-on-secondary-container dark:bg-secondary-container/20 dark:text-secondary-container px-xs py-0.5 rounded font-label-md text-[8px] font-bold">RECOMMANDE</span>';
+            html += '    </div>';
+            html += '  </div>';
+
+            // Tags
+            html += '  <div class="flex flex-wrap gap-xs">';
+            if (p.type) html += '    <span class="bg-surface-container dark:bg-inverse-surface/40 px-sm py-1 rounded-full font-label-md text-label-md text-on-surface-variant dark:text-surface-variant">' + escapeHtml(p.type) + '</span>';
+            if (p.nb_etages) html += '    <span class="bg-surface-container dark:bg-inverse-surface/40 px-sm py-1 rounded-full font-label-md text-label-md text-on-surface-variant dark:text-surface-variant">' + p.nb_etages + ' étages</span>';
+            if (p.surface_utile_m2) html += '    <span class="bg-surface-container dark:bg-inverse-surface/40 px-sm py-1 rounded-full font-label-md text-label-md text-on-surface-variant dark:text-surface-variant">' + p.surface_utile_m2 + ' m²</span>';
+            if (p.cout_estime_dh) html += '    <span class="bg-surface-container dark:bg-inverse-surface/40 px-sm py-1 rounded-full font-label-md text-label-md text-on-surface-variant dark:text-surface-variant">' + (p.cout_estime_dh / 1000000).toFixed(1) + 'M DH</span>';
+            html += '  </div>';
+
+            // MCDM bars
+            var cv = p.criteria_values || {};
+            var wm = data.mcdm && data.mcdm.weights_used ? data.mcdm.weights_used : {};
+            var labels = {
+                surface_utilisable: 'Surface', cout_estime: 'Coût', conformite_reglementaire: 'Conformité',
+                faisabilite_technique: 'Faisabilité', delai_realisation: 'Délai', ml_viability_score: 'ML'
+            };
+            if (Object.keys(cv).length > 0) {
+                html += '  <div class="space-y-xs pt-xs border-t border-outline-variant/30">';
+                html += '    <p class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant font-bold uppercase tracking-wider">Poids MCDM</p>';
+                html += '    <div class="space-y-2">';
+                Object.keys(cv).forEach(function(k) {
                     var w = wm[k] || 0;
                     var v = cv[k];
                     var maxVal = k === 'cout_estime' ? 10000000 : (k === 'delai_realisation' ? 60 : (k === 'surface_utilisable' ? 1000 : 10));
                     var pct = Math.min(100, Math.round((v / maxVal) * 100));
-                    var barColor = k === 'conformite_reglementaire' ? '#059669' : (k === 'cout_estime' ? '#ef4444' : (k === 'delai_realisation' ? '#f59e0b' : '#3b82f6'));
-                    html +=
-                        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">' +
-                            '<span style="font-size:12px;color:#6b7280;width:85px;flex-shrink:0;">' + (labels[k] || k) + '</span>' +
-                            '<div style="flex:1;height:10px;background:#e5e7eb;border-radius:5px;overflow:hidden;">' +
-                                '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:5px;"></div>' +
-                            '</div>' +
-                            '<span style="font-size:12px;font-weight:600;color:#374151;width:50px;text-align:right;">' + v + '</span>' +
-                            '<span style="font-size:11px;color:#9ca3af;width:30px;text-align:right;">' + (w*100).toFixed(0) + '%</span>' +
-                        '</div>';
+                    var barColor = k === 'conformite_reglementaire' ? '#059669' : (k === 'cout_estime' ? '#e11d48' : (k === 'delai_realisation' ? '#d97706' : '#2563eb'));
+                    
+                    var valStr = v;
+                    if (k === 'cout_estime') valStr = (v / 1000000).toFixed(1) + 'M';
+                    
+                    html += '      <div class="flex items-center gap-sm">';
+                    html += '        <span class="w-16 font-body-sm text-body-sm text-on-surface-variant dark:text-surface-variant/80 shrink-0">' + (labels[k] || k) + '</span>';
+                    html += '        <div class="flex-1 h-2 bg-surface-container dark:bg-inverse-surface/50 rounded-full overflow-hidden">';
+                    html += '          <div class="h-full rounded-full transition-all duration-500" style="width:' + pct + '%;background:' + barColor + ';"></div>';
+                    html += '        </div>';
+                    html += '        <div class="flex gap-1 items-baseline w-16 justify-end text-right shrink-0">';
+                    html += '          <span class="font-bold text-[12px] text-on-surface dark:text-white">' + valStr + '</span>';
+                    html += '          <span class="text-[9px] text-on-surface-variant/60 dark:text-surface-variant/50">' + (w * 100).toFixed(0) + '%</span>';
+                    html += '        </div>';
+                    html += '      </div>';
                 });
-                html += '</div>';
+                html += '    </div>';
+                html += '  </div>';
+            }
 
-                // ML Predictions
-                var ml = p.ml_predictions || {};
-                var preds = ml.predictions || {};
-                var predKeys = Object.keys(preds);
-                if (predKeys.length > 0) {
-                    html += '<details style="font-size:12px;margin-bottom:6px;"><summary style="cursor:pointer;color:#6366f1;font-weight:500;">Predictions IA (' + predKeys.length + ')</summary>';
-                    predKeys.forEach(function(task){
-                        var r = preds[task];
-                        if (r && r.label) {
-                            html += '<div style="display:flex;justify-content:space-between;padding:3px 10px;background:#eef2ff;margin:3px 0;border-radius:4px;font-size:12px;">' +
-                                '<span>' + task + '</span><span><strong>' + r.label + '</strong> (' + r.confidence + '%)</span></div>';
-                        }
+            // ML predictions
+            var ml = p.ml_predictions || {};
+            var preds = ml.predictions || {};
+            var predKeys = Object.keys(preds);
+            if (predKeys.length > 0) {
+                html += '  <details class="group mt-xs border-t border-outline-variant/30 pt-xs">';
+                html += '    <summary class="font-label-md text-label-md text-primary dark:text-inverse-primary cursor-pointer hover:underline select-none flex items-center justify-between list-none">';
+                html += '      <span>Prédictions IA (' + predKeys.length + ')</span>';
+                html += '      <span class="material-symbols-outlined text-[16px] transition-transform group-open:rotate-180">expand_more</span>';
+                html += '    </summary>';
+                html += '    <div class="mt-xs space-y-xs">';
+                predKeys.forEach(function(task) {
+                    var r = preds[task];
+                    if (r && r.label) {
+                        html += '      <div class="flex justify-between items-center bg-surface-container-low dark:bg-inverse-surface/40 px-sm py-1.5 rounded text-[11px]">';
+                        html += '        <span class="text-on-surface-variant dark:text-surface-variant/80 font-medium">' + escapeHtml(task) + '</span>';
+                        html += '        <span class="text-on-surface dark:text-white font-bold">' + escapeHtml(r.label) + ' <span class="text-[9px] text-on-surface-variant/60 dark:text-surface-variant/50 font-normal">(' + r.confidence + '%)</span></span>';
+                        html += '      </div>';
+                    }
+                });
+                html += '    </div>';
+                html += '  </details>';
+            }
+
+            // Conformity card
+            var conf = p.conformite || {};
+            if (conf.risk_level) {
+                var cardBgBorder = 'bg-surface-container border-outline-variant/50';
+                var chipStyle = 'bg-surface-container text-on-surface-variant';
+                
+                if (conf.risk_level === 'Faible') {
+                    cardBgBorder = 'bg-secondary/5 border-secondary/20 dark:bg-secondary/10 dark:border-secondary/30';
+                    chipStyle = 'bg-secondary-container/20 text-[#00714e] dark:text-[#82f5c1]';
+                } else if (conf.risk_level === 'Moyen') {
+                    cardBgBorder = 'bg-tertiary-container/5 border-tertiary-container/20 dark:bg-tertiary-container/10 dark:border-tertiary-container/30';
+                    chipStyle = 'bg-tertiary-container/20 text-[#824500] dark:text-[#ffb77d]';
+                } else if (conf.risk_level === 'Eleve' || conf.risk_level === 'Critique') {
+                    cardBgBorder = 'bg-error-container/5 border-error-container/20 dark:bg-error-container/10 dark:border-error-container/30';
+                    chipStyle = 'bg-error-container/20 text-[#ba1a1a] dark:text-[#ffdad6]';
+                }
+
+                html += '  <div class="mt-auto pt-sm border-t border-outline-variant/30">';
+                html += '    <div class="' + cardBgBorder + ' rounded-lg border p-sm space-y-sm">';
+                html += '      <div class="flex justify-between items-center">';
+                html += '        <strong class="font-bold font-body-sm text-body-sm text-on-surface dark:text-white">Conformité</strong>';
+                html += '        <span class="' + chipStyle + ' px-xs py-0.5 rounded font-label-md text-[9px] font-bold uppercase tracking-wider">' + escapeHtml(conf.risk_level) + '</span>';
+                html += '      </div>';
+                if (conf.classification) {
+                    html += '      <p class="text-[11px] font-bold text-on-surface dark:text-white leading-tight">Classification : <span class="font-normal text-on-surface-variant dark:text-surface-variant/80">' + escapeHtml(conf.classification) + '</span></p>';
+                }
+                if (conf.key_points && conf.key_points.length > 0) {
+                    html += '      <ul class="text-[11px] text-on-surface-variant dark:text-surface-variant/85 space-y-1 pl-4 list-disc">';
+                    conf.key_points.forEach(function(kp) {
+                        html += '        <li>' + escapeHtml(kp) + '</li>';
                     });
-                    html += '</details>';
+                    html += '      </ul>';
                 }
-
-                // Conformite
-                var conf = p.conformite || {};
-                if (conf.risk_level) {
-                    var riskColors = { Faible: ['#bbf7d0','#059669'], Moyen: ['#fde68a','#d97706'], Eleve: ['#fecaca','#ef4444'], inconnu: ['#e5e7eb','#6b7280'] };
-                    var rc = riskColors[conf.risk_level] || riskColors['inconnu'];
-                    html += '<div style="border:1px solid ' + rc[0] + ';border-radius:8px;padding:10px;margin-top:6px;background:#fafafa;">';
-                    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
-                        '<span style="font-weight:600;font-size:13px;color:#374151;">Conformite</span>' +
-                        '<span style="background:' + rc[0] + ';color:' + rc[1] + ';font-weight:700;font-size:12px;padding:3px 12px;border-radius:10px;">' + escapeHtml(conf.risk_level) + '</span></div>';
-                    if (conf.classification) {
-                        html += '<div style="font-size:13px;color:#374151;margin-bottom:4px;"><strong>Classification :</strong> ' + escapeHtml(conf.classification) + '</div>';
-                    }
-                    if (conf.key_points && conf.key_points.length > 0) {
-                        html += '<ul style="margin:4px 0 0 0;padding-left:16px;font-size:12px;color:#6b7280;line-height:1.5;">';
-                        conf.key_points.forEach(function(kp){
-                            html += '<li>' + escapeHtml(kp) + '</li>';
-                        });
-                        html += '</ul>';
-                    }
-                    if (conf.details) {
-                        html += '<div style="font-size:12px;color:#9ca3af;margin-top:4px;">' + escapeHtml(conf.details) + '</div>';
-                    }
-                    html += '</div>';
+                if (conf.details) {
+                    html += '      <p class="text-[11px] text-on-surface-variant/80 dark:text-surface-variant/75 italic border-t border-outline-variant/20 pt-xs mt-xs">' + escapeHtml(conf.details) + '</p>';
                 }
+                html += '    </div>';
+                html += '  </div>';
+            }
 
-                html += '</div>';
-            });
+            html += '  <button class="w-full mt-auto border border-primary text-primary dark:border-inverse-primary dark:text-inverse-primary py-xs rounded-lg font-label-md text-label-md hover:bg-primary/5 dark:hover:bg-inverse-primary/5 transition-colors flex items-center justify-center gap-xs">';
+            html += '    <span class="material-symbols-outlined text-[18px]">visibility</span> Aperçu';
+            html += '  </button>';
             html += '</div>';
+        });
+        html += '</div>';
 
-            // Resume MCDM
-            var mcdm = data.mcdm || {};
-            html += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-top:14px;font-size:13px;color:#374151;">' +
-                '<strong>Methode :</strong> ' + (mcdm.method || 'WSM').toUpperCase() +
-                ' &nbsp;|&nbsp; <strong>Poids :</strong> ' + (mcdm.weights_used ? Object.values(mcdm.weights_used).map(function(w){ return (w*100).toFixed(0)+'%'; }).join(' / ') : '') +
-                '</div>';
+        // MCDM summary
+        var mcdm = data.mcdm || {};
+        var weightStr = mcdm.weights_used ? Object.values(mcdm.weights_used).map(function(w) { return (w * 100).toFixed(0) + '%'; }).join(' / ') : '';
+        html += '<div class="bg-secondary/5 border border-secondary/20 dark:bg-secondary/10 dark:border-secondary/30 rounded-xl p-sm font-body-sm text-on-surface dark:text-white flex items-center gap-sm flex-wrap mt-md">';
+        html += '  <strong>Méthode :</strong> <span class="uppercase font-semibold">' + ((mcdm.method || 'WSM').toUpperCase()) + '</span>';
+        if (weightStr) {
+            html += '  <span class="text-outline-variant dark:text-outline">|</span>';
+            html += '  <strong>Poids :</strong> <span class="font-mono text-xs">' + weightStr + '</span>';
         }
+        html += '</div>';
+    }
 
-        document.getElementById('taxoRecomResult').innerHTML = html;
-        document.getElementById('taxoRecomResult').style.display = 'block';
-        document.getElementById('taxoRecomResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }).catch(function(){
-        document.getElementById('taxoRecomLoader').style.display = 'none';
-        document.getElementById('btnRecomRun').disabled = false;
-        document.getElementById('taxoRecomResult').innerHTML = '<p style="color:#ef4444;">Erreur lors de l\'analyse.</p>';
-        document.getElementById('taxoRecomResult').style.display = 'block';
+    document.getElementById('resultsContainer').innerHTML = html;
+    document.getElementById('resultsContainer').style.display = 'block';
+    document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Render sources
+    var sources = data.regulations && data.regulations.regulations ? data.regulations.regulations : [];
+    renderSources(sources);
+}
+
+function renderSources(sources) {
+    var container = document.getElementById('sourceContent');
+    var count = document.getElementById('sourceCount');
+
+    if (!sources || sources.length === 0) {
+        container.innerHTML = '<div class="source-rail-empty flex flex-col items-center justify-center text-center h-full p-lg gap-sm text-on-surface-variant/70 dark:text-surface-variant/70 font-body-sm" id="sourceEmpty"><span class="material-symbols-outlined text-[32px] text-on-surface-variant/40 dark:text-surface-variant/40">description</span><p>Aucune source réglementaire retrouvée.</p></div>';
+        count.textContent = '';
+        return;
+    }
+
+    count.textContent = sources.length + ' source' + (sources.length > 1 ? 's' : '');
+
+    var html = '';
+    sources.forEach(function(s) {
+        var snippet = (s.text || s.contenu || s.content || '').substring(0, 120);
+        var domain = s.domaine || s.domain || s.source || '';
+        var matchPct = s.score || 0;
+        if (typeof matchPct === 'number') matchPct = Math.round(matchPct * 100) + '%';
+
+        html += '<div class="bg-surface-container-low dark:bg-inverse-surface/40 border border-outline-variant/50 rounded-lg p-sm shadow-sm hover:shadow-md hover:border-primary/30 dark:hover:border-inverse-primary/30 transition-all duration-200 cursor-pointer flex flex-col gap-xs">';
+        html += '  <div class="font-bold text-body-sm text-on-surface dark:text-white truncate" title="' + escapeHtml(s.source || s.titre || s.title || s.nom || 'Source') + '">' + escapeHtml(s.source || s.titre || s.title || s.nom || 'Source') + '</div>';
+        if (snippet) html += '  <div class="text-body-sm text-on-surface-variant dark:text-surface-variant/80 line-clamp-2 leading-snug">' + escapeHtml(snippet) + '...</div>';
+        html += '  <div class="flex items-center justify-between mt-xs pt-xs border-t border-outline-variant/10">';
+        if (matchPct) html += '    <span class="bg-secondary-container/20 text-[#00714e] dark:text-[#82f5c1] px-xs py-0.5 rounded font-label-md text-[9px] font-bold">' + matchPct + '</span>';
+        if (domain) html += '    <span class="text-label-md text-on-surface-variant/70 dark:text-surface-variant/60 uppercase tracking-wider text-[9px]">' + escapeHtml(domain) + '</span>';
+        html += '  </div>';
+        html += '</div>';
     });
+
+    container.innerHTML = html;
+}
+
+function resetAll() {
+    document.getElementById('queryInput').value = '';
+    document.getElementById('emptyState').style.display = 'flex';
+    document.getElementById('resultsContainer').style.display = 'none';
+    document.getElementById('resultsContainer').innerHTML = '';
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('btnRun').disabled = false;
+    document.getElementById('sourceContent').innerHTML = '<div class="source-rail-empty flex flex-col items-center justify-center text-center h-full p-lg gap-sm text-on-surface-variant/70 dark:text-surface-variant/70 font-body-sm" id="sourceEmpty"><span class="material-symbols-outlined text-[32px] text-on-surface-variant/40 dark:text-surface-variant/40">description</span><p>Les sources réglementaires apparaîtront ici après l\'analyse.</p></div>';
+    document.getElementById('sourceCount').textContent = '';
 }
 </script>
 
